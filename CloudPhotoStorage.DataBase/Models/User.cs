@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.DataBase.Models
 {
-    internal class User
+    public class User
     {
         // Первичный ключ
-        private int UserId { get; set; }
-        private string Login { get; set; }
-        private string PasswordHash { get; set; }
-        private string PasswordSalt { get; set; }
+        [Key]
+        public int UserId { get; set; }
+        public string Login { get; set; }
+        public string PasswordHash { get; set; }
+        public string PasswordSalt { get; set; }
         // Внешний ключ
-        private string RoleID { get; set; }
+        [ForeignKey("RoleID")]
+        public string RoleID { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace CloudPhotoStorage.DataBase
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=CloudPhotoStorage.db");
+            optionsBuilder.UseNpgsql("Data Source=CloudPhotoStorage.db");
         }
     }
 }
