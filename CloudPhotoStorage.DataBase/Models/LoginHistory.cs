@@ -8,5 +8,10 @@ namespace CloudPhotoStorage.DataBase.Models
 {
     internal class LoginHistory
     {
+        // Первичный ключ
+        public int LoginId { get; set; }
+        // Внешний ключ
+        public int UserId { get; set; }
+        public DateTime LoginDate { get; set; }
     }
 }

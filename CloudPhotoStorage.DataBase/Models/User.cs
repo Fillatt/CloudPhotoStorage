@@ -8,16 +8,12 @@ namespace CloudPhotoStorage.DataBase.Models
 {
     internal class User
     {
-        /// <summary>
-        /// Первичный ключ
-        /// </summary>
+        // Первичный ключ
         private int UserId { get; set; }
         private string Login { get; set; }
         private string PasswordHash { get; set; }
         private string PasswordSalt { get; set; }
-        /// <summary>
-        /// Внешний ключ
-        /// </summary>
+        // Внешний ключ
         private string RoleID { get; set; }
     }
 }
