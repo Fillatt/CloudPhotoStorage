@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.DataBase.Models
 {
-    internal class LoginHistory
+    public class LoginHistory
     {
         // Первичный ключ
         public int LoginId { get; set; }
