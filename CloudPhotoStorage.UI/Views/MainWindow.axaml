@@ -1,20 +1,123 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:CloudPhotoStorage.UI.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CloudPhotoStorage.UI.Views.MainWindow"
+        xmlns:vm="using:CloudPhotoStorage.UI.ViewModels"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="CloudPhotoStorage.UI">
+        FontFamily="avares://Avalonia.Fonts.Inter/Inter-Regular.otf#Inter, Arial, sans-serif"
+        Background="#FF121117">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <!-- Боковая панель с градиентом -->
+        <Border Grid.Column="0">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#FF3B3A3F"/>
+                    <GradientStop Offset="0.5" Color="#FF1C1B20"/>
+                    <GradientStop Offset="1" Color="#FF1C1B20"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            
+            <!-- Меню -->
+            <StackPanel Margin="20" Spacing="8">
+                <TextBlock Text="Cloud Storage" FontSize="20" Foreground="White" Margin="0 0 0 20"/>
+                
+                <ItemsControl ItemsSource="{Binding MenuItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12 8" Classes="MenuItem">
+                                <TextBlock Text="{Binding}" Foreground="White" FontSize="16"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
 
+        <!-- Основная область -->
+        <Border Grid.Column="1" Background="#FF121117">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+                <!-- Область загрузки с градиентом -->
+                <Border Width="400" Height="300" CornerRadius="12" Classes="UploadArea">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Offset="0" Color="#FF3B3A3F"/>
+                            <GradientStop Offset="0.5" Color="#FF1C1B20"/>
+                            <GradientStop Offset="1" Color="#FF1C1B20"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Offset="0" Color="#FF4B4A4F"/>
+                            <GradientStop Offset="1" Color="#FF3C3B40"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.BorderThickness>2</Border.BorderThickness>
+                    
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+                        <PathIcon Width="50" Height="50" Foreground="#FF777777" 
+                                 Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                        <TextBlock Text="Перетащите ваши файлы, чтобы начать загрузку" 
+                                   HorizontalAlignment="Center" TextAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="ИЛИ" HorizontalAlignment="Center" Foreground="#FF777777"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Кнопка с градиентом -->
+                <Button Content="Загрузить" Width="150" Height="40" CornerRadius="6" Classes="UploadButton"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+    <Window.Styles>
+        <!-- Стили для пунктов меню -->
+        <Style Selector="Border.MenuItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="0 2"/>
+        </Style>
+
+        <Style Selector="Border.MenuItem:pointerover">
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#FF4B4A4F"/>
+                    <GradientStop Offset="1" Color="#FF2C2B30"/>
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для области загрузки -->
+        <Style Selector="Border.UploadArea:pointerover">
+            <Setter Property="BorderBrush">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#FF5B5A5F"/>
+                    <GradientStop Offset="1" Color="#FF4C4B50"/>
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для кнопки -->
+        <Style Selector="Button.UploadButton">
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Offset="0" Color="#FF3B3A3F"/>
+                    <GradientStop Offset="1" Color="#FF2C2B30"/>
+                </LinearGradientBrush>
+            </Setter>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.UploadButton:pointerover">
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Offset="0" Color="#FF4B4A4F"/>
+                    <GradientStop Offset="1" Color="#FF3C3B40"/>
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+    </Window.Styles>
 </Window>
