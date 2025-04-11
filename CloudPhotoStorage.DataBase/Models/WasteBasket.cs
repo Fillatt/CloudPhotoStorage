@@ -3,14 +3,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CloudPhotoStorage.DataBase.Models
 {
-    public class LoginHistory
+    public class WasteBasket
     {
         [Key]
-        public int LoginId { get; set; }
-        
+        public int WasteBasketId { get; set; }
+
         [ForeignKey("UserId")]
         public int UserId { get; set; }
 
-        public DateTime LoginDate { get; set; }
+        [ForeignKey("ImageId")]
+        public int ImageId { get; set; }
+
+        public DateTime? DeleteDate { get; set; }
     }
 }
