@@ -29,7 +29,7 @@ namespace CloudPhotoStorage.API.Controllers
         }
         // GET: api/images
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages()
+        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages(CancellationToken cancellationToken)
         {
             return await _context.Images
                 .Join(_context.Users,
@@ -47,7 +47,7 @@ namespace CloudPhotoStorage.API.Controllers
                         UserLogin = temp.user.Login,
                         CategoryName = category.CategoryName
                     })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
         // GET api/images/5
