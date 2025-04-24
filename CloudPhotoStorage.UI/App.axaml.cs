@@ -1,16 +1,19 @@
-using System.Linq;
+using Autofac;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using CloudPhotoStorage.UI.Autofac;
 using CloudPhotoStorage.UI.ViewModels;
 using CloudPhotoStorage.UI.Views;
+using System.Linq;
 
 namespace CloudPhotoStorage.UI
 {
     public partial class App : Application
     {
+        private IContainer? Container { get; set; }
+
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
@@ -18,6 +21,8 @@ namespace CloudPhotoStorage.UI
 
         public override void OnFrameworkInitializationCompleted()
         {
+            Container = RegisterContainer();
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
@@ -25,11 +30,21 @@ namespace CloudPhotoStorage.UI
                 DisableAvaloniaDataAnnotationValidation();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(),
+                    DataContext = Container.Resolve<MainWindowViewModel>(),
                 };
             }
 
             base.OnFrameworkInitializationCompleted();
+        }
+
+        private IContainer RegisterContainer()
+        {
+            var containerBuilder = new ContainerBuilder();
+
+            containerBuilder
+                .RegisterModules();
+
+            return containerBuilder.Build();
         }
 
         private void DisableAvaloniaDataAnnotationValidation()

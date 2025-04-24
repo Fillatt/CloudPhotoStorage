@@ -1,8 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using ReactiveUI;
 
 namespace CloudPhotoStorage.UI.ViewModels
 {
-    public class ViewModelBase : ObservableObject
+    public class ViewModelBase : ReactiveObject
     {
     }
 }
