@@ -15,7 +15,16 @@ namespace CloudPhotoStorage.DataBase
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Data Source=CloudPhotoStorage.db");
+            if (!optionsBuilder.IsConfigured){
+                //optionsBuilder.UseNpgsql("Data Source=CloudPhotoStorage.db");
+                optionsBuilder.UseNpgsql(
+                    "Host=localhost;" +
+                    "Port=5432;" +
+                    "Database=CloudPhotoStorage;" +
+                    "Username=postgres;" +
+                    "Password=password");
+            }
+            base.OnConfiguring(optionsBuilder);
         }
     }
 }
