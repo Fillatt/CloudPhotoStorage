@@ -1,5 +1,6 @@
-﻿using System;
-using Avalonia;
+﻿using Avalonia;
+using Avalonia.ReactiveUI;
+using System;
 
 namespace CloudPhotoStorage.UI
 {
@@ -17,6 +18,7 @@ namespace CloudPhotoStorage.UI
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .WithInterFont()
-                .LogToTrace();
+                .LogToTrace()
+                .UseReactiveUI();
     }
 }
