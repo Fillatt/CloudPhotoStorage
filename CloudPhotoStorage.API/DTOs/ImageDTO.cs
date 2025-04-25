@@ -1,10 +1,10 @@
 ﻿namespace CloudPhotoStorage.API.DTOs
 {
-    public class ImageDTO
+    public record ImageDTO
     {
-        public string FileName { get; set; }
-        public DateTime? UploadDate { get; set; }
-        public string UserLogin { get; set; }
-        public string CategoryName { get; set; }
+        public string FileName { get; init; }
+        public DateTime? UploadDate { get; init; }
+        public string UserLogin { get; init; }
+        public string CategoryName { get; init; }
     }
 }

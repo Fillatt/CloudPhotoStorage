@@ -33,22 +33,51 @@ namespace CloudPhotoStorage.API.Controllers
         [Route("api/images/get/all")]
         public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages(CancellationToken cancellationToken)
         {
-            return await _context.Images
-                .Join(_context.Users,
-                    image => image.UserId,
-                    user => user.UserId,
-                    (image, user) => new { image, user })
-                .Join(_context.Categories,
-                    temp => temp.image.CategoryId,
-                    category => category.CategoryId,
-                    (temp, category) => new ImageDTO
-                    {
-                        FileName = temp.image.FileName,
-                        UploadDate = temp.image.UploadDate,
-                        UserLogin = temp.user.Login,
-                        CategoryName = category.CategoryName
-                    })
-                .ToListAsync(cancellationToken);
+            try
+            {
+                // Проверка доступности контекста базы данных
+                if (_context == null)
+                {
+                    _logger.LogError("Database context is not available");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Service unavailable");
+                }
+
+                var images = await _context.Images
+                    .Join(_context.Users,
+                        image => image.UserId,
+                        user => user.UserId,
+                        (image, user) => new { image, user })
+                    .Join(_context.Categories,
+                        temp => temp.image.CategoryId,
+                        category => category.CategoryId,
+                        (temp, category) => new ImageDTO
+                        {
+                            FileName = temp.image.FileName,
+                            UploadDate = temp.image.UploadDate,
+                            UserLogin = temp.user.Login,
+                            CategoryName = category.CategoryName
+                        })
+                    .ToListAsync(cancellationToken);
+
+                // Проверка на пустой результат
+                if (images == null || !images.Any())
+                {
+                    _logger.LogInformation("No images found in database");
+                    return NotFound("No images available");
+                }
+
+                return Ok(images);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("Request was cancelled");
+                return StatusCode(StatusCodes.Status499ClientClosedRequest, "Request cancelled");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving images from database");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
         // GET /api/images/get/{id}
         // Возвращает конкретное изображение по ID
