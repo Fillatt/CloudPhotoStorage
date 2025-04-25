@@ -27,8 +27,10 @@ namespace CloudPhotoStorage.API.Controllers
             }
 
         }
-        // GET: api/images
+        // GET /api/images/get/all
+        // Возвращает список всех изображений с информацией о пользователях и категориях
         [HttpGet]
+        [Route("api/images/get/all")]
         public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages(CancellationToken cancellationToken)
         {
             return await _context.Images
@@ -41,7 +43,6 @@ namespace CloudPhotoStorage.API.Controllers
                     category => category.CategoryId,
                     (temp, category) => new ImageDTO
                     {
-                        ImageId = temp.image.ImageId,
                         FileName = temp.image.FileName,
                         UploadDate = temp.image.UploadDate,
                         UserLogin = temp.user.Login,
@@ -49,9 +50,10 @@ namespace CloudPhotoStorage.API.Controllers
                     })
                 .ToListAsync(cancellationToken);
         }
-
-        // GET api/images/5
-        [HttpGet("{id}")]
+        // GET /api/images/get/{id}
+        // Возвращает конкретное изображение по ID
+        [HttpGet]
+        [Route("api/images/get/{id:int}")]
         public async Task<IActionResult> GetImage(int id)
         {
             var image = await _context.Images
@@ -63,9 +65,11 @@ namespace CloudPhotoStorage.API.Controllers
             return PhysicalFile(image.FilePath, "application/octet-stream", image.FileName);
         }
 
-        // POST api/images
+        // POST /api/images/add
+        // Добавляет новое изображение
         [HttpPost]
-        public async Task<ActionResult<ImageDTO>> UploadImage(
+        [Route("api/images/add")]
+        public async Task<ActionResult<ImageDTO>> AddImage(
             IFormFile file,
             [FromForm] int userId,
             [FromForm] int categoryId)
@@ -116,7 +120,6 @@ namespace CloudPhotoStorage.API.Controllers
 
                 return CreatedAtAction(nameof(GetImage), new { id = image.ImageId }, new ImageDTO
                 {
-                    ImageId = image.ImageId,
                     FileName = image.FileName,
                     UploadDate = image.UploadDate,
                     UserLogin = user.Login,
@@ -130,8 +133,10 @@ namespace CloudPhotoStorage.API.Controllers
             }
         }
 
-        // DELETE api/images/5
-        [HttpDelete("{id}")]
+        // DELETE /api/images/delete/{id}
+        // Удаляет изображение и перемещает его в корзину
+        [HttpDelete]
+        [Route("api/images/delete/{id:int}")]
         public async Task<ActionResult<WasteBasketDTO>> DeleteImage(int id, [FromQuery] int userId)
         {
             var image = await _context.Images.FindAsync(id);
