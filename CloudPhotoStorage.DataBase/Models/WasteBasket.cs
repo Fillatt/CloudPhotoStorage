@@ -15,5 +15,8 @@ namespace CloudPhotoStorage.DataBase.Models
         public int ImageId { get; set; }
 
         public DateTime? DeleteDate { get; set; }
+
+        public virtual User User { get; set; }
+        public virtual Image Image { get; set; }
     }
 }
