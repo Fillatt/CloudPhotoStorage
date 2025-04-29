@@ -4,19 +4,19 @@ using CloudPhotoStorage.UI.Views;
 
 namespace CloudPhotoStorage.UI.Sections;
 
-public class ConfigurationSection : ISection
+public class ConfigurationSection : IMenuSection
 {
     private ConfigurationViewModel _configurationViewModel;
 
     public string Name { get; } = "Настройки конфигурации";
 
-    public UserControl Control { get; }
+    public UserControl View { get; }
 
     public ConfigurationSection(ConfigurationViewModel configurationViewModel)
     {
         _configurationViewModel = configurationViewModel;
 
-        Control = new ConfigurationView()
+        View = new ConfigurationView()
         {
             DataContext = _configurationViewModel
         };

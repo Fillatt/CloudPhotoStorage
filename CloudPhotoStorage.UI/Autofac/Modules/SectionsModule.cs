@@ -11,14 +11,14 @@ public class SectionsModule : Module
 
         builder
             .RegisterType<AuthenticationSection>()
-            .As<ISection>();
+            .As<IMenuSection>();
 
         builder
             .RegisterType<PhotoSection>()
-            .As<ISection>();
+            .As<IMenuSection>();
 
         builder
             .RegisterType<ConfigurationSection>()
-            .As<ISection>();
+            .As<IMenuSection>();
     }
 }

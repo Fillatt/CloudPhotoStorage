@@ -4,19 +4,19 @@ using CloudPhotoStorage.UI.Views;
 
 namespace CloudPhotoStorage.UI.Sections;
 
-public class AuthenticationSection : ISection
+public class AuthenticationSection : IMenuSection
 {
     private AuthenticationViewModel _authenticationViewModel;
 
     public string Name { get; } = "Аутентификация";
 
-    public UserControl Control { get; }
+    public UserControl View { get; }
 
     public AuthenticationSection(AuthenticationViewModel authenticationViewModel)
     {
         _authenticationViewModel = authenticationViewModel;
 
-        Control = new AuthenticationView()
+        View = new AuthenticationView()
         {
             DataContext = _authenticationViewModel
         };
