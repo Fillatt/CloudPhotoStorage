@@ -6,17 +6,17 @@ namespace CloudPhotoStorage.UI.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        private ISection? _currentTab;
+        private IMenuSection? _currentTab;
 
-        public IEnumerable<ISection> Tabs { get; }
+        public IEnumerable<IMenuSection> Tabs { get; }
 
-        public ISection? CurrentTab
+        public IMenuSection? CurrentTab
         {
             get => _currentTab;
             set => this.RaiseAndSetIfChanged(ref _currentTab, value);
         }
 
-        public MainWindowViewModel(IEnumerable<ISection> sections)
+        public MainWindowViewModel(IEnumerable<IMenuSection> sections)
         {
             Tabs = sections;
         }

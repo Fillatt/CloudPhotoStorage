@@ -4,19 +4,19 @@ using CloudPhotoStorage.UI.Views;
 
 namespace CloudPhotoStorage.UI.Sections
 {
-    public class PhotoSection : ISection
+    public class PhotoSection : IMenuSection
     {
         private PhotoViewModel _photoViewModel;
 
         public string Name { get; } = "Фотографии";
 
-        public UserControl Control { get; }
+        public UserControl View { get; }
 
         public PhotoSection(PhotoViewModel photoViewModel)
         {
             _photoViewModel = photoViewModel;
 
-            Control = new PhotoView()
+            View = new PhotoView()
             {
                 DataContext = _photoViewModel
             };

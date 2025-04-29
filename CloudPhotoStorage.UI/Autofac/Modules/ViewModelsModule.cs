@@ -24,5 +24,11 @@ public class ViewModelsModule : Module
         builder
             .RegisterType<ConfigurationViewModel>()
             .SingleInstance();
+
+        builder
+            .RegisterType<LoginViewModel>();
+
+        builder
+            .RegisterType<RegistrationViewModel>();
     }
 }

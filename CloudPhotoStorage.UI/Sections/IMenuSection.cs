@@ -2,9 +2,9 @@
 
 namespace CloudPhotoStorage.UI.Sections;
 
-public interface ISection
+public interface IMenuSection
 {
     string Name { get; }
 
-    UserControl Control { get; }
+    UserControl View { get; }
 }

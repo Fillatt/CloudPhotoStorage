@@ -10,7 +10,6 @@
 		x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="CloudPhotoStorage.UI">
-	
 	<TabControl ItemsSource="{Binding Tabs}"
 				SelectedItem="{Binding CurrentTab}">
 		<TabControl.ItemTemplate>
@@ -19,10 +18,9 @@
 			</DataTemplate>
 		</TabControl.ItemTemplate>
 		<TabControl.ContentTemplate>
-			<DataTemplate x:DataType="sections:ISection">
-				<ContentPresenter Content="{Binding Control}"/>
+			<DataTemplate x:DataType="sections:IMenuSection">
+				<ContentPresenter Content="{Binding View}"/>
 			</DataTemplate>
 		</TabControl.ContentTemplate>
 	</TabControl>
-	
 </Window>
