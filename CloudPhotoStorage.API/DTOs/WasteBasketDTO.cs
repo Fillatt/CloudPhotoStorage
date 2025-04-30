@@ -2,8 +2,8 @@
 {
     public class WasteBasketDTO
     {
-        public string FileName { get; set; }
-        public string UserLogin { get; set; }
-        public DateTime? DeleteDate { get; set; }
+        public string FileName { get; init; }
+        public string UserLogin { get; init; }
+        public DateTime? DeleteDate { get; init; }
     }
 }
