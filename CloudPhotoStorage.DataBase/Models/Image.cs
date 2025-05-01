@@ -14,7 +14,7 @@ namespace CloudPhotoStorage.DataBase.Models
         [ForeignKey("CategoryId")]
         public Guid CategoryId {  get; set; }
 
-        public string? ImageName {  get; set; }
+        public string ImageName {  get; set; }
         public byte[] ImageBytes{  get; set; }
         public DateTime? UploadDate { get; set; }
     }

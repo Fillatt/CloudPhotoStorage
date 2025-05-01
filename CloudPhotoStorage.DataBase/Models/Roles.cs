@@ -7,6 +7,6 @@ namespace CloudPhotoStorage.DataBase.Models
         [Key]
         public Guid RoleId { get; set; }
 
-        public string? Role { get; set; }
+        public string Role { get; set; }
     }
 }
