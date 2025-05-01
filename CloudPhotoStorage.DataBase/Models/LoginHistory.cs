@@ -6,10 +6,10 @@ namespace CloudPhotoStorage.DataBase.Models
     public class LoginHistory
     {
         [Key]
-        public int LoginId { get; set; }
+        public Guid LoginId { get; set; }
         
         [ForeignKey("UserId")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         public DateTime LoginDate { get; set; }
     }
