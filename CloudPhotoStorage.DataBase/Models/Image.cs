@@ -16,6 +16,6 @@ namespace CloudPhotoStorage.DataBase.Models
 
         public string ImageName {  get; set; }
         public byte[] ImageBytes{  get; set; }
-        public DateTime? UploadDate { get; set; }
+        public DateTime UploadDate { get; set; }
     }
 }
