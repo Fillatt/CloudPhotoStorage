@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using CloudPhotoStorage.DataBase.Models;
+using System.Threading;
 
 namespace CloudPhotoStorage.DataBase.Repositories
 {
@@ -16,32 +17,33 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<Image> GetById(int id)
+        public async Task<Image> GetById(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
-                .FirstOrDefaultAsync(i => i.ImageId == id);
+                .FirstOrDefaultAsync(i => i.ImageId == id, cancellationToken);
         }
+
         /// <summary>
         /// Получить все изображения пользователя
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<Image>> GetByUserId(int userId)
+        public async Task<IEnumerable<Image>> GetByUserId(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
                 .Where(i => i.UserId == userId)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
         /// <summary>
         /// Получить изображения по категории
         /// </summary>
         /// <param name="categoryId"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<Image>> GetByCategoryId(int categoryId)
+        public async Task<IEnumerable<Image>> GetByCategoryId(Guid categoryId, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
                 .Where(i => i.CategoryId == categoryId)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -49,20 +51,20 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="searchTerm"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<Image>> SearchByName(string searchTerm)
+        public async Task<IEnumerable<Image>> SearchByName(string searchTerm, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
-                .Where(i => i.FileName.Contains(searchTerm))
-                .ToListAsync();
+                .Where(i => i.ImageName.Contains(searchTerm))
+                .ToListAsync(cancellationToken);
         }
 
         /// <summary>
         /// Получить все изображения
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Image>> GetAll()
+        public async Task<IEnumerable<Image>> GetAll(CancellationToken cancellationToken)
         {
-            return await _dbContext.Images.ToListAsync();
+            return await _dbContext.Images.ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -70,10 +72,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
-        public async Task Add(Image image)
+        public async Task Add(Image image, CancellationToken cancellationToken)
         {
-            await _dbContext.Images.AddAsync(image);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.Images.AddAsync(image, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -81,10 +83,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
-        public async Task Update(Image image)
+        public async Task Update(Image image, CancellationToken cancellationToken)
         {
             _dbContext.Images.Update(image);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -92,10 +94,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
-        public async Task Delete(Image image)
+        public async Task Delete(Image image, CancellationToken cancellationToken)
         {
             _dbContext.Images.Remove(image);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -103,12 +105,12 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task DeleteById(int id)
+        public async Task DeleteById(Guid id, CancellationToken cancellationToken)
         {
-            var image = await GetById(id);
+            var image = await GetById(id, cancellationToken);
             if (image != null)
             {
-                await Delete(image);
+                await Delete(image, cancellationToken);
             }
         }
 
@@ -117,10 +119,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<bool> Exists(int id)
+        public async Task<bool> Exists(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
-                .AnyAsync(i => i.ImageId == id);
+                .AnyAsync(i => i.ImageId == id, cancellationToken);
         }
 
         /// <summary>
@@ -128,11 +130,11 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<int> GetCountByUser(int userId)
+        public async Task<int> GetCountByUser(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
                 .Where(i => i.UserId == userId)
-                .CountAsync();
+                .CountAsync(cancellationToken);
         }
 
         /// <summary>
@@ -140,12 +142,12 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<Image>> GetRecentImages(int count)
+        public async Task<IEnumerable<Image>> GetRecentImages(int count, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
                 .OrderByDescending(i => i.UploadDate)
                 .Take(count)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
     }
 }

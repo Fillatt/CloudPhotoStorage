@@ -17,10 +17,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<LoginHistory> GetById(int id)
+        public async Task<LoginHistory> GetById(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.LoginHistories
-                .FirstOrDefaultAsync(lh => lh.LoginId == id);
+                .FirstOrDefaultAsync(lh => lh.LoginId == id, cancellationToken);
         }
 
         /// <summary>
@@ -28,12 +28,12 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<LoginHistory>> GetByUserId(int userId)
+        public async Task<IEnumerable<LoginHistory>> GetByUserId(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.LoginHistories
                 .Where(lh => lh.UserId == userId)
                 .OrderByDescending(lh => lh.LoginDate)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -41,23 +41,23 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<LoginHistory> GetLastLogin(int userId)
+        public async Task<LoginHistory> GetLastLogin(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.LoginHistories
                 .Where(lh => lh.UserId == userId)
                 .OrderByDescending(lh => lh.LoginDate)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <summary>
         /// Получить все записи истории входов
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<LoginHistory>> GetAll()
+        public async Task<IEnumerable<LoginHistory>> GetAll(CancellationToken cancellationToken)
         {
             return await _dbContext.LoginHistories
                 .OrderByDescending(lh => lh.LoginDate)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -65,10 +65,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="loginHistory"></param>
         /// <returns></returns>
-        public async Task Add(LoginHistory loginHistory)
+        public async Task Add(LoginHistory loginHistory, CancellationToken cancellationToken)
         {
-            await _dbContext.LoginHistories.AddAsync(loginHistory);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.LoginHistories.AddAsync(loginHistory, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -76,10 +76,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="loginHistory"></param>
         /// <returns></returns>
-        public async Task Delete(LoginHistory loginHistory)
+        public async Task Delete(LoginHistory loginHistory, CancellationToken cancellationToken)
         {
             _dbContext.LoginHistories.Remove(loginHistory);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -87,12 +87,12 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task DeleteById(int id)
+        public async Task DeleteById(Guid id, CancellationToken cancellationToken)
         {
-            var loginHistory = await GetById(id);
+            var loginHistory = await GetById(id, cancellationToken);
             if (loginHistory != null)
             {
-                await Delete(loginHistory);
+                await Delete(loginHistory, cancellationToken);
             }
         }
 
@@ -101,11 +101,11 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<int> GetLoginCount(int userId)
+        public async Task<int> GetLoginCount(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.LoginHistories
                 .Where(lh => lh.UserId == userId)
-                .CountAsync();
+                .CountAsync(cancellationToken);
         }
     }
 }

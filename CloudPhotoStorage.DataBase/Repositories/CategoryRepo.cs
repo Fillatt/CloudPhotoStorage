@@ -1,4 +1,5 @@
-﻿using CloudPhotoStorage.DataBase.Models;
+﻿using System.Threading;
+using CloudPhotoStorage.DataBase.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudPhotoStorage.DataBase.Repositories
@@ -17,10 +18,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<Category> GetById(int id)
+        public async Task<Category> GetById(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Categories
-                .FirstOrDefaultAsync(c => c.CategoryId == id);
+                .FirstOrDefaultAsync(c => c.CategoryId == id, cancellationToken);
         }
 
         /// <summary>
@@ -28,19 +29,19 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public async Task<Category> GetByName(string name)
+        public async Task<Category> GetByName(string name, CancellationToken cancellationToken)
         {
             return await _dbContext.Categories
-                .FirstOrDefaultAsync(c => c.CategoryName == name);
+                .FirstOrDefaultAsync(c => c.CategoryName == name, cancellationToken);
         }
 
         /// <summary>
         /// Получить все категории
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Category>> GetAll()
+        public async Task<IEnumerable<Category>> GetAll(CancellationToken cancellationToken)
         {
-            return await _dbContext.Categories.ToListAsync();
+            return await _dbContext.Categories.ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -48,10 +49,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public async Task Add(Category category)
+        public async Task Add(Category category, CancellationToken cancellationToken)
         {
-            await _dbContext.Categories.AddAsync(category);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.Categories.AddAsync(category, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -59,10 +60,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public async Task Update(Category category)
+        public async Task Update(Category category, CancellationToken cancellationToken)
         {
             _dbContext.Categories.Update(category);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -70,10 +71,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public async Task Delete(Category category)
+        public async Task Delete(Category category, CancellationToken cancellationToken)
         {
             _dbContext.Categories.Remove(category);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -81,12 +82,12 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task DeleteById(int id)
+        public async Task DeleteById(Guid id, CancellationToken cancellationToken)
         {
-            var category = await GetById(id);
+            var category = await GetById(id, cancellationToken);
             if (category != null)
             {
-                await Delete(category);
+                await Delete(category, cancellationToken);
             }
         }
 
@@ -95,10 +96,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<bool> Existsc(int id)
+        public async Task<bool> Existsc(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Categories
-                .AnyAsync(c => c.CategoryId == id);
+                .AnyAsync(c => c.CategoryId == id, cancellationToken);
         }
 
         /// <summary>
@@ -106,10 +107,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public async Task<bool> NameExists(string name)
+        public async Task<bool> NameExists(string name, CancellationToken cancellationToken)
         {
             return await _dbContext.Categories
-                .AnyAsync(c => c.CategoryName == name);
+                .AnyAsync(c => c.CategoryName == name, cancellationToken);
         }
 
         /// <summary>
@@ -117,11 +118,11 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="categoryId"></param>
         /// <returns></returns>
-        public async Task<int> GetImageCount(int categoryId)
+        public async Task<int> GetImageCount(Guid categoryId, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
                 .Where(i => i.CategoryId == categoryId)
-                .CountAsync();
+                .CountAsync(cancellationToken);
         }
     }
 }

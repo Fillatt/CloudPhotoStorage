@@ -17,10 +17,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<WasteBasket> GetById(int id)
+        public async Task<WasteBasket> GetById(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.WasteBaskets
-                .FirstOrDefaultAsync(w => w.WasteBasketId == id);
+                .FirstOrDefaultAsync(w => w.WasteBasketId == id, cancellationToken);
         }
 
         /// <summary>
@@ -28,11 +28,11 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<WasteBasket> GetWithImageById(int id)
+        public async Task<WasteBasket> GetWithImageById(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.WasteBaskets
                 .Include(w => w.Image)
-                .FirstOrDefaultAsync(w => w.WasteBasketId == id);
+                .FirstOrDefaultAsync(w => w.WasteBasketId == id, cancellationToken);
         }
 
         /// <summary>
@@ -40,12 +40,12 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<WasteBasket>> GetByUserId(int userId)
+        public async Task<IEnumerable<WasteBasket>> GetByUserId(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.WasteBaskets
                 .Where(w => w.UserId == userId)
                 .OrderByDescending(w => w.DeleteDate)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -53,13 +53,13 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<WasteBasket>> GetWithImagesByUserId(int userId)
+        public async Task<IEnumerable<WasteBasket>> GetWithImagesByUserId(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.WasteBaskets
                 .Where(w => w.UserId == userId)
                 .Include(w => w.Image)
                 .OrderByDescending(w => w.DeleteDate)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -67,11 +67,11 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="wasteBasket"></param>
         /// <returns></returns>
-        public async Task Add(WasteBasket wasteBasket)
+        public async Task Add(WasteBasket wasteBasket, CancellationToken cancellationToken)
         {
             wasteBasket.DeleteDate = DateTime.UtcNow;
-            await _dbContext.WasteBaskets.AddAsync(wasteBasket);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.WasteBaskets.AddAsync(wasteBasket, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -79,10 +79,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="wasteBasket"></param>
         /// <returns></returns>
-        public async Task Remove(WasteBasket wasteBasket)
+        public async Task Remove(WasteBasket wasteBasket, CancellationToken cancellationToken)
         {
             _dbContext.WasteBaskets.Remove(wasteBasket);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -90,13 +90,13 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<int> ClearByUserId(int userId)
+        public async Task<int> ClearByUserId(Guid userId, CancellationToken cancellationToken)
         {
             var items = _dbContext.WasteBaskets.Where(w => w.UserId == userId);
-            int count = await items.CountAsync();
+            int count = await items.CountAsync(cancellationToken);
 
             _dbContext.WasteBaskets.RemoveRange(items);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return count;
         }
@@ -106,10 +106,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="imageId"></param>
         /// <returns></returns>
-        public async Task<bool> ContainsImage(int imageId)
+        public async Task<bool> ContainsImage(Guid imageId, CancellationToken cancellationToken)
         {
             return await _dbContext.WasteBaskets
-                .AnyAsync(w => w.ImageId == imageId);
+                .AnyAsync(w => w.ImageId == imageId, cancellationToken);
         }
     }
 }

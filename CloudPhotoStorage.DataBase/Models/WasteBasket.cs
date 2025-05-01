@@ -6,13 +6,13 @@ namespace CloudPhotoStorage.DataBase.Models
     public class WasteBasket
     {
         [Key]
-        public int WasteBasketId { get; set; }
+        public Guid WasteBasketId { get; set; }
 
         [ForeignKey("UserId")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [ForeignKey("ImageId")]
-        public int ImageId { get; set; }
+        public Guid ImageId { get; set; }
 
         public DateTime? DeleteDate { get; set; }
 

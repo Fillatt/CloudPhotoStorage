@@ -17,10 +17,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        public async Task<Roles> GetById(int roleId)
+        public async Task<Roles> GetById(Guid roleId, CancellationToken cancellationToken)
         {
             return await _dbContext.Roles
-                .FirstOrDefaultAsync(r => r.RoleId == roleId);
+                .FirstOrDefaultAsync(r => r.RoleId == roleId, cancellationToken);
         }
 
         /// <summary>
@@ -28,19 +28,19 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="roleName"></param>
         /// <returns></returns>
-        public async Task<Roles> GetByRoleName(string roleName)
+        public async Task<Roles> GetByRoleName(string roleName, CancellationToken cancellationToken)
         {
             return await _dbContext.Roles
-                .FirstOrDefaultAsync(r => r.Role == roleName);
+                .FirstOrDefaultAsync(r => r.Role == roleName, cancellationToken);
         }
 
         /// <summary>
         /// Получить все роли
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Roles>> GetAll()
+        public async Task<IEnumerable<Roles>> GetAll(CancellationToken cancellationToken)
         {
-            return await _dbContext.Roles.ToListAsync();
+            return await _dbContext.Roles.ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -48,10 +48,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-        public async Task Add(Roles role)
+        public async Task Add(Roles role, CancellationToken cancellationToken)
         {
-            await _dbContext.Roles.AddAsync(role);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.Roles.AddAsync(role, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -59,10 +59,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-        public async Task Update(Roles role)
+        public async Task Update(Roles role, CancellationToken cancellationToken)
         {
             _dbContext.Roles.Update(role);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -70,10 +70,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-        public async Task Delete(Roles role)
+        public async Task Delete(Roles role, CancellationToken cancellationToken)
         {
             _dbContext.Roles.Remove(role);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
@@ -81,12 +81,12 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        public async Task DeleteById(int roleId)
+        public async Task DeleteById(Guid roleId, CancellationToken cancellationToken)
         {
-            var role = await GetById(roleId);
+            var role = await GetById(roleId, cancellationToken);
             if (role != null)
             {
-                await Delete(role);
+                await Delete(role, cancellationToken);
             }
         }
 
@@ -95,10 +95,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        public async Task<bool> ExistsById(int roleId)
+        public async Task<bool> ExistsById(Guid roleId, CancellationToken cancellationToken)
         {
             return await _dbContext.Roles
-                .AnyAsync(r => r.RoleId == roleId);
+                .AnyAsync(r => r.RoleId == roleId, cancellationToken);
         }
 
         /// <summary>
@@ -106,10 +106,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="roleName"></param>
         /// <returns></returns>
-        public async Task<bool> ExistsByName(string roleName)
+        public async Task<bool> ExistsByName(string roleName, CancellationToken cancellationToken)
         {
             return await _dbContext.Roles
-                .AnyAsync(r => r.Role == roleName);
+                .AnyAsync(r => r.Role == roleName, cancellationToken);
         }
 
         /// <summary>
@@ -117,11 +117,11 @@ namespace CloudPhotoStorage.DataBase.Repositories
         /// </summary>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        public async Task<int> GetUsersCountByRole(int roleId)
+        public async Task<int> GetUsersCountByRole(Guid roleId, CancellationToken cancellationToken)
         {
             return await _dbContext.Users
-                .Where(u => u.RoleID == roleId.ToString())
-                .CountAsync();
+                .Where(u => u.RoleID == roleId)
+                .CountAsync(cancellationToken);
         }
     }
 }

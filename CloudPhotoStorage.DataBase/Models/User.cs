@@ -6,10 +6,10 @@ namespace CloudPhotoStorage.DataBase.Models
     public class User
     {
         [Key]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [ForeignKey("RoleID")]
-        public string RoleID { get; set; }
+        public Guid RoleID { get; set; }
 
         public string Login { get; set; }
         public string PasswordHash { get; set; }
