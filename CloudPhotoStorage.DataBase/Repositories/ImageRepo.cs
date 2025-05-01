@@ -23,6 +23,28 @@ namespace CloudPhotoStorage.DataBase.Repositories
                 .FirstOrDefaultAsync(i => i.ImageId == id, cancellationToken);
         }
 
+        public async Task<Dictionary<string, string>> GetUserImagesWithCategories(string username, CancellationToken cancellationToken)
+        {
+            return await _dbContext.Users
+                .Where(u => u.Login == username)
+                .Join(
+                    _dbContext.Images,
+                    user => user.UserId,
+                    image => image.UserId,
+                    (user, image) => new { image.ImageName, image.CategoryId }
+                )
+                .Join(
+                    _dbContext.Categories,
+                    img => img.CategoryId,
+                    category => category.CategoryId,
+                    (img, category) => new { img.ImageName, category.CategoryName }
+                )
+                .ToDictionaryAsync(
+                    img => img.ImageName,
+                    img => img.CategoryName,
+                    cancellationToken
+                );
+        }
         /// <summary>
         /// Получить все изображения пользователя
         /// </summary>
