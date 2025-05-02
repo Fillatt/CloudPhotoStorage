@@ -10,8 +10,9 @@
 		x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="CloudPhotoStorage.UI">
+	
 	<TabControl ItemsSource="{Binding Tabs}"
-				SelectedItem="{Binding CurrentTab}">
+	            SelectedItem="{Binding CurrentTab}">
 		<TabControl.ItemTemplate>
 			<DataTemplate>
 				<TextBlock Text="{Binding Name}"/>
@@ -23,4 +24,5 @@
 			</DataTemplate>
 		</TabControl.ContentTemplate>
 	</TabControl>
+	
 </Window>
