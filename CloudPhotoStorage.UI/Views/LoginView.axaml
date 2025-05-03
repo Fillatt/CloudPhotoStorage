@@ -28,7 +28,7 @@
                      Text="{Binding Password}"
                      HorizontalAlignment="Stretch"
                      MinWidth="200"
-                     PasswordChar="●"/>
+                     PasswordChar="*"/>
 
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left"
