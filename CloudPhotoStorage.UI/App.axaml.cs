@@ -19,6 +19,7 @@ namespace CloudPhotoStorage.UI
             AvaloniaXamlLoader.Load(this);
         }
 
+        /*
         public override void OnFrameworkInitializationCompleted()
         {
             Container = RegisterContainer();
@@ -31,6 +32,30 @@ namespace CloudPhotoStorage.UI
                 desktop.MainWindow = new MainWindow
                 {
                     DataContext = Container.Resolve<MainWindowViewModel>(),
+                };
+            }
+
+            base.OnFrameworkInitializationCompleted();
+        }
+        */
+        public override void OnFrameworkInitializationCompleted()
+        {
+            Container = RegisterContainer();
+
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                DisableAvaloniaDataAnnotationValidation();
+        
+                // Временный код для теста RegistrationView
+                desktop.MainWindow = new MainWindow
+                {
+                    Content = new RegistrationView
+                    {
+                        DataContext = new RegistrationViewModel()
+                    },
+                    Width = 400,
+                    Height = 450,
+                    Title = "Тест регистрации"
                 };
             }
 
