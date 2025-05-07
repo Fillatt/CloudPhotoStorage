@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CloudPhotoStorage.API.Controllers
 {
-    [Route("api/[controller]")]
+ 
     [ApiController]
     public class ImagesController : ControllerBase
     {
@@ -200,7 +200,7 @@ namespace CloudPhotoStorage.API.Controllers
         /// Получить имена изображений с категориями
         /// </summary>
         [HttpGet]
-        [Route("/api/images/get/names-with-categories")]
+        [Route("api/images/get/names-with-categories")]
         public async Task<ActionResult<Dictionary<string, string>>> GetImageNamesWithCategories(CancellationToken cancellationToken)
         {
             try
