@@ -44,7 +44,7 @@ namespace CloudPhotoStorage.API.Controllers
                     Login = userDto.LoginString,
                     PasswordHash = passwordHash,
                     PasswordSalt = Convert.ToBase64String(salt),
-                    RoleID = userDto.RoleID 
+                    //RoleID = userDto.RoleID 
                 };
 
                 _context.Users.Add(user);

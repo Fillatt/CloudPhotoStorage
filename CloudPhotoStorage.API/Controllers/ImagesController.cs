@@ -1,8 +1,7 @@
 ﻿using CloudPhotoStorage.API.DTOs;
-using CloudPhotoStorage.DataBase;
 using CloudPhotoStorage.DataBase.Models;
+using CloudPhotoStorage.DataBase.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CloudPhotoStorage.API.Controllers
 {
@@ -10,146 +9,142 @@ namespace CloudPhotoStorage.API.Controllers
     [ApiController]
     public class ImagesController : ControllerBase
     {
-
-        private readonly ApplicationContext _context;
         private readonly ILogger<ImagesController> _logger;
-        private readonly string _storagePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        private readonly ImageRepo _imageRepo;
+        private readonly UserRepo _userRepo;
+        private readonly CategoryRepo _categoryRepo;
+        private readonly WasteBasketRepo _wasteBasketRepo;
+        private readonly LoginHistoryRepo _loginHistoryRepo;
 
-        public ImagesController(ApplicationContext context, ILogger<ImagesController> logger)
+        public ImagesController(
+            ILogger<ImagesController> logger,
+            ImageRepo imageRepo,
+            UserRepo userRepo,
+            CategoryRepo categoryRepo,
+            WasteBasketRepo wasteBasketRepo,
+            LoginHistoryRepo loginHistoryRepo)
         {
-            _context = context;
             _logger = logger;
-
-            // Создаем папку для хранения, если не существует
-            if (!Directory.Exists(_storagePath))
-            {
-                Directory.CreateDirectory(_storagePath);
-            }
-
+            _imageRepo = imageRepo;
+            _userRepo = userRepo;
+            _categoryRepo = categoryRepo;
+            _wasteBasketRepo = wasteBasketRepo;
+            _loginHistoryRepo = loginHistoryRepo;
         }
-        // GET /api/images/get/all
-        // Возвращает список всех изображений с информацией о пользователях и категориях
+
+        /// <summary>
+        /// Получить все изображения
+        /// </summary>
         [HttpGet]
-        [Route("api/images/get/all")]
-        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages(CancellationToken cancellationToken)
+        [Route("api/images/get")]
+        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetAllImages(CancellationToken cancellationToken)
         {
             try
             {
-                // Проверка доступности контекста базы данных
-                if (_context == null)
-                {
-                    _logger.LogError("Database context is not available");
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Service unavailable");
-                }
+                var images = await _imageRepo.GetAllAsync(cancellationToken);
 
-                var images = await _context.Images
-                    .Join(_context.Users,
-                        image => image.UserId,
-                        user => user.UserId,
-                        (image, user) => new { image, user })
-                    .Join(_context.Categories,
-                        temp => temp.image.CategoryId,
-                        category => category.CategoryId,
-                        (temp, category) => new ImageDTO
-                        {
-                            FileName = temp.image.FileName,
-                            UploadDate = temp.image.UploadDate,
-                            UserLogin = temp.user.Login,
-                            CategoryName = category.CategoryName
-                        })
-                    .ToListAsync(cancellationToken);
-
-                // Проверка на пустой результат
                 if (images == null || !images.Any())
                 {
-                    _logger.LogInformation("No images found in database");
-                    return NotFound("No images available");
+                    return NotFound("Изображения не найдены");
                 }
 
-                return Ok(images);
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogWarning("Request was cancelled");
-                return StatusCode(StatusCodes.Status499ClientClosedRequest, "Request cancelled");
+                var result = new List<ImageDTO>();
+                foreach (var image in images)
+                {
+                    var user = await _userRepo.GetByIdAsync(image.UserId, cancellationToken);
+                    var category = await _categoryRepo.GetByIdAsync(image.CategoryId, cancellationToken);
+
+                    result.Add(new ImageDTO
+                    {
+                        ImagePath = image.ImageBytes,
+                        Name = image.ImageName,
+                        UploadDate = image.UploadDate,
+                        UserLogin = user?.Login ?? "Неизвестно",
+                        CategoryName = category?.CategoryName ?? "Без категории"
+                    });
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving images from database");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+                _logger.LogError(ex, "Ошибка при получении изображений");
+                return StatusCode(500, "Внутренняя ошибка сервера");
             }
         }
-        // GET /api/images/get/{id}
-        // Возвращает конкретное изображение по ID
+
+        /// <summary>
+        /// Получить изображение по ID
+        /// </summary>
         [HttpGet]
-        [Route("api/images/get/{id:int}")]
-        public async Task<IActionResult> GetImage(int id)
+        [Route("api/images/get/{id}")]
+        public async Task<IActionResult> GetImageById(Guid id, CancellationToken cancellationToken)
         {
-            var image = await _context.Images
-                .FirstOrDefaultAsync(i => i.ImageId == id);
-
-            if (image == null || !System.IO.File.Exists(image.FilePath))
-                return NotFound();
-
-            return PhysicalFile(image.FilePath, "application/octet-stream", image.FileName);
-        }
-
-        // POST /api/images/add
-        // Добавляет новое изображение
-        [HttpPost]
-        [Route("api/images/add")]
-        public async Task<ActionResult<ImageDTO>> AddImage(
-            IFormFile file,
-            [FromForm] int userId,
-            [FromForm] int categoryId)
-        {
-            // Валидация
-            if (file == null || file.Length == 0)
-                return BadRequest("File is required");
-
-            // Проверка пользователя и категории
-            var user = await _context.Users.FindAsync(userId);
-            var category = await _context.Categories.FindAsync(categoryId);
-
-            if (user == null || category == null)
-                return BadRequest("Invalid user or category");
-
             try
             {
-                // Генерация уникального имени файла
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                var filePath = Path.Combine(_storagePath, fileName);
-
-                // Сохранение файла
-                using (var stream = System.IO.File.Create(filePath))
+                var image = await _imageRepo.GetByIdAsync(id, cancellationToken);
+                if (image == null)
                 {
-                    await file.CopyToAsync(stream);
+                    return NotFound();
                 }
 
-                // Создание записи в БД
+                return File(image.ImageBytes, "application/octet-stream", image.ImageName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Ошибка при получении изображения с ID {id}");
+                return StatusCode(500, "Внутренняя ошибка сервера");
+            }
+        }
+
+        /// <summary>
+        /// Загрузить новое изображение
+        /// </summary>
+        [HttpPost]
+        [Route("api/images/post")]
+        public async Task<ActionResult<ImageDTO>> UploadImage([FromBody] ImageDTO imageDto, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (imageDto.ImagePath == null || imageDto.ImagePath.Length == 0)
+                {
+                    return BadRequest("Изображение обязательно");
+                }
+
+                Guid userId = Guid.NewGuid(); // Заменить на реальный ID пользователя
+                Guid categoryId = Guid.NewGuid(); // Заменить на реальный ID категории
+
+                var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
+                var category = await _categoryRepo.GetByIdAsync(categoryId, cancellationToken);
+
+                if (user == null || category == null)
+                {
+                    return BadRequest("Неверный пользователь или категория");
+                }
+
                 var image = new Image
                 {
-                    FileName = file.FileName,
-                    FilePath = filePath,
-                    UploadDate = DateTime.UtcNow,
+                    ImageId = Guid.NewGuid(),
+                    ImageName = imageDto.Name,
+                    ImageBytes = imageDto.ImagePath,
+                    UploadDate = imageDto.UploadDate ?? DateTime.UtcNow,
                     UserId = userId,
                     CategoryId = categoryId
                 };
 
-                _context.Images.Add(image);
-                await _context.SaveChangesAsync();
+                await _imageRepo.AddAsync(image, cancellationToken);
 
-                // Логирование в историю
-                _context.LoginHistories.Add(new LoginHistory
+                await _loginHistoryRepo.AddAsync(new LoginHistory
                 {
+                    LoginId = Guid.NewGuid(),
                     UserId = userId,
                     LoginDate = DateTime.UtcNow
-                });
-                await _context.SaveChangesAsync();
+                }, cancellationToken);
 
-                return CreatedAtAction(nameof(GetImage), new { id = image.ImageId }, new ImageDTO
+                return CreatedAtAction(nameof(GetImageById), new { id = image.ImageId }, new ImageDTO
                 {
-                    FileName = image.FileName,
+                    ImagePath = image.ImageBytes,
+                    Name = image.ImageName,
                     UploadDate = image.UploadDate,
                     UserLogin = user.Login,
                     CategoryName = category.CategoryName
@@ -157,49 +152,72 @@ namespace CloudPhotoStorage.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error uploading image");
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "Ошибка при загрузке изображения");
+                return StatusCode(500, "Внутренняя ошибка сервера");
             }
         }
 
-        // DELETE /api/images/delete/{id}
-        // Удаляет изображение и перемещает его в корзину
-        [HttpDelete]
-        [Route("api/images/delete/{id:int}")]
-        public async Task<ActionResult<WasteBasketDTO>> DeleteImage(int id, [FromQuery] int userId)
+        /// <summary>
+        /// Удалить изображение
+        /// </summary>
+        [Route("api/images/delete/{id}")]
+        public async Task<IActionResult> DeleteImage(Guid id, [FromQuery] Guid userId, CancellationToken cancellationToken)
         {
-            var image = await _context.Images.FindAsync(id);
-            if (image == null)
-                return NotFound();
-
             try
             {
-                // Перемещение в корзину
-                var wasteItem = new WasteBasket
+                var image = await _imageRepo.GetByIdAsync(id, cancellationToken);
+                if (image == null)
                 {
+                    return NotFound();
+                }
+
+                var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
+                if (user == null)
+                {
+                    return BadRequest("Неверный пользователь");
+                }
+
+                await _wasteBasketRepo.AddAsync(new WasteBasket
+                {
+                    WasteBasketId = Guid.NewGuid(),
+                    ImageId = image.ImageId,
                     UserId = userId,
                     DeleteDate = DateTime.UtcNow
-                };
+                }, cancellationToken);
 
-                _context.WasteBaskets.Add(wasteItem);
-                _context.Images.Remove(image);
-                await _context.SaveChangesAsync();
+                await _imageRepo.DeleteAsync(image, cancellationToken);
 
-                return new WasteBasketDTO
-                {
-                    FileName = image.FileName,
-                    UserLogin = (await _context.Users.FindAsync(userId)).Login,
-                    DeleteDate = wasteItem.DeleteDate
-                };
+                return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting image");
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, $"Ошибка при удалении изображения с ID {id}");
+                return StatusCode(500, "Внутренняя ошибка сервера");
+            }
+        }
+
+        /// <summary>
+        /// Получить имена изображений с категориями
+        /// </summary>
+        [HttpGet]
+        [Route("/api/images/get/names-with-categories")]
+        public async Task<ActionResult<Dictionary<string, string>>> GetImageNamesWithCategories(CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(User.Identity?.Name))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _imageRepo.GetUserImagesWithCategoriesAsync(User.Identity.Name, cancellationToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении имен изображений с категориями");
+                return StatusCode(500, "Внутренняя ошибка сервера");
             }
         }
     }
 }
-
-
-
