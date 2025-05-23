@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace CloudPhotoStorage.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -25,23 +25,25 @@ namespace CloudPhotoStorage.API.Controllers
         // Регистрация нового пользователя
         [HttpPost]
         [Route("api/account/registration")]
-        public async Task<IActionResult> Register([FromBody] UserDTO userDto)
+        public async Task<IActionResult> RegisterAsync()
         {
             try
             {
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
+
                 // Проверка на существующего пользователя
-                if (await _context.Users.AnyAsync(u => u.Login == userDto.LoginString))
+                if (await _context.Users.AnyAsync(u => u.Login == userDto.Login))
                 {
                     return Conflict("Пользователь с таким логином уже существует");
                 }
 
                 // Генерация соли и хеша пароля
                 var salt = GenerateSalt();
-                var passwordHash = HashPassword(userDto.PasswordHash, salt);
+                var passwordHash = HashPassword(userDto.Password, salt);
 
                 var user = new User
                 {
-                    Login = userDto.LoginString,
+                    Login = userDto.Login,
                     PasswordHash = passwordHash,
                     PasswordSalt = Convert.ToBase64String(salt),
                     //RoleID = userDto.RoleID 

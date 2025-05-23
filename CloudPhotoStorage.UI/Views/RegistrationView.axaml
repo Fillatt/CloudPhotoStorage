@@ -42,8 +42,8 @@
 			<StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left"
                         Spacing="10">
-				<Button Content="Назад" Command="{Binding BackCommand}" MinWidth="145"/>
-				<Button Content="Регистрация" Command="{Binding RegisterCommand}" MinWidth="145"/>
+				<Button Content="Назад" MinWidth="145"/>
+				<Button Content="Регистрация" Command="{Binding Commands.Registration}" MinWidth="145"/>
 			</StackPanel>
 		</StackPanel>
 	</Grid>

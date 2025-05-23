@@ -26,5 +26,8 @@ public class ServicesModule : Module
 
         builder
             .RegisterType<ImageApiService>();
+
+        builder
+            .RegisterType<AuthenticationApiService>();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using CloudPhotoStorage.UI.Views;
 using ReactiveUI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,29 @@ public class AuthenticationViewModel : ViewModelBase
 
     private RegistrationView _registrationView;
 
-    public UserControl CurrentView { get; set; }
+    private UserControl _currentView;
+
+    public UserControl CurrentView 
+    { 
+        get => _currentView; 
+        set => this.RaiseAndSetIfChanged(ref _currentView, value); 
+    }
 
     public AuthenticationViewModel(LoginViewModel loginViewModel, RegistrationViewModel registrationViewModel)
     {
         _loginViewModel = loginViewModel;
+        _loginViewModel.RegistrationSelected += OnRegistrationSelected;
+
         _registrationViewModel = registrationViewModel;
 
         _loginView = new LoginView() { DataContext = _loginViewModel };
         _registrationView = new RegistrationView() { DataContext = _registrationViewModel };
 
         CurrentView = _loginView;
+    }
+
+    public void OnRegistrationSelected(object? sender, EventArgs eventArgs)
+    {
+        CurrentView = _registrationView;
     }
 }

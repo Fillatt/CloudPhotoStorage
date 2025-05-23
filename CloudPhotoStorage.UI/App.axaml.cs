@@ -18,7 +18,6 @@ namespace CloudPhotoStorage.UI
         {
             AvaloniaXamlLoader.Load(this);
         }
-
         public override void OnFrameworkInitializationCompleted()
         {
             Container = RegisterContainer();
