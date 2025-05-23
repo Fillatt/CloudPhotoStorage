@@ -8,27 +8,33 @@ using ReactiveUI;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
-public class LoginViewModel : ViewModelBase
+public partial class LoginViewModel : ViewModelBase
 {
-    public string Login { get; set; }
-    public string Password { get; set; }
+    public string _login;
 
-    public ICommand LoginCommand { get; }
-    public ICommand RegisterCommand { get; }
+    public string _password;
+
+    public string Login 
+    { 
+        get => _login;
+        set => this.RaiseAndSetIfChanged(ref _login, value);
+    }
+
+    public string Password
+    {
+        get => _password;
+        set => this.RaiseAndSetIfChanged(ref _password, value);
+    }
+
+    public event EventHandler<EventArgs> RegistrationSelected;
 
     public LoginViewModel()
     {
-        LoginCommand = ReactiveCommand.Create(OnLogin);
-        RegisterCommand = ReactiveCommand.Create(OnRegister);
+
     }
 
-    private void OnLogin()
+    public void Register()
     {
-        // Авторизация
-    }
-
-    private void OnRegister()
-    {
-        // Переход к регистрации
+        RegistrationSelected.Invoke(this, EventArgs.Empty);
     }
 }

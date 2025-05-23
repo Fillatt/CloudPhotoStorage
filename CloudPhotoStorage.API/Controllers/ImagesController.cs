@@ -200,14 +200,13 @@ namespace CloudPhotoStorage.API.Controllers
         /// Получить имена изображений с категориями указанного пользователя
         /// </summary>
         [HttpPost]
-        [Route("api/images/get/names-with-categories/{userId:guid}")]
-        public async Task<ActionResult<Dictionary<string, string>>> GetImageNamesWithCategories(
-            Guid userId,
-            CancellationToken cancellationToken)
+        [Route("api/images/get/names-with-categories")]
+        public async Task<ActionResult<Dictionary<string, string>>> GetImageNamesWithCategories(CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _imageRepo.GetUserImagesWithCategoriesAsync(userId, cancellationToken);
+                var userName = await new StreamReader(HttpContext.Response.Body).ReadToEndAsync();
+                var result = await _imageRepo.GetUserImagesWithCategoriesAsync(userName, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)

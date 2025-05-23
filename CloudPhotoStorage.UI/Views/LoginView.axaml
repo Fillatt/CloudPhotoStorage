@@ -32,10 +32,9 @@
 
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left"
-                        Spacing="10"
-                        >
-                <Button Content="Войти" Command="{Binding LoginCommand}" MinWidth="145"/>
-                <Button Content="Регистрация" Command="{Binding RegisterCommand}" MinWidth="145"/>
+                        Spacing="10">
+                <Button Content="Войти" MinWidth="145"/>
+                <Button Content="Регистрация" Command="{Binding Commands.Register}" MinWidth="145"/>
             </StackPanel>
         </StackPanel>
     </Grid>

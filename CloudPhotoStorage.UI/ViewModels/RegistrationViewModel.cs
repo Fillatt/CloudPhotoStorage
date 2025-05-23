@@ -1,38 +1,58 @@
-﻿using ReactiveUI;
+﻿using CloudPhotoStorage.UI.APIClient.DTO;
+using CloudPhotoStorage.UI.APIClient.Services;
+using ReactiveUI;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
-public class RegistrationViewModel : ViewModelBase
+public partial class RegistrationViewModel : ViewModelBase
 {
-    public string Login { get; set; }
-    public string Password { get; set; }
-    public string Role { get; set; }
-    
+    private string _login;
+
+    private string _password;
+
+    private string _role;
+
+    private AuthenticationApiService _authenticationApiService;
+
+    public string Login 
+    { 
+        get => _login; 
+        set => this.RaiseAndSetIfChanged(ref _login, value); 
+    }
+    public string Password 
+    {
+        get => _password;
+        set => this.RaiseAndSetIfChanged(ref _password, value);
+    }
+    public string Role 
+    {
+        get => _role;
+        set => this.RaiseAndSetIfChanged(ref _role, value);
+    }
+
     public List<string> AvailableRoles { get; } = new()
     {
         "Пользователь",
-        "Администратор",
-        "Модератор"
+        "Администратор"
     };
 
-    public ICommand RegisterCommand { get; }
-    public ICommand BackCommand { get; }
-
-    public RegistrationViewModel()
+    public RegistrationViewModel(AuthenticationApiService authenticationApiService)
     {
-        RegisterCommand = ReactiveCommand.Create(OnRegister);
-        BackCommand = ReactiveCommand.Create(OnBack);
+        _authenticationApiService = authenticationApiService;
     }
-
-    private void OnRegister()
+    
+    public async Task RegistrationAsync()
     {
-        // Логика регистрации
-    }
+        var account = new AccountDTO
+        {
+            Login = Login,
+            Password = Password,
+            Role = Role
+        };
 
-    private void OnBack()
-    {
-        // Логика возврата
+        await _authenticationApiService.RegistrationAsync(account);
     }
 }
