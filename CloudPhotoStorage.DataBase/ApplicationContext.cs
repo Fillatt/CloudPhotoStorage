@@ -16,7 +16,7 @@ namespace CloudPhotoStorage.DataBase
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured){
-                //optionsBuilder.UseNpgsql("Data Source=CloudPhotoStorage.db");
+               // optionsBuilder.UseNpgsql("Data Source=CloudPhotoStorage.db");
                 optionsBuilder.UseNpgsql(
                     "Host=localhost;" +
                     "Port=5432;" +
