@@ -2,9 +2,11 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -18,7 +20,8 @@ public class ImageApiService
 
     public ImageApiService(IConfiguration configuration)
     {
-        _apiURL = configuration.GetRequiredSection("BaseURL").ToString();
+        var section = configuration.GetRequiredSection("BaseURL");
+        _apiURL = section.Value;
     }
 
     public async Task SendImageAsync(ImageDTO imageDTO)
@@ -38,15 +41,24 @@ public class ImageApiService
         var response = await _httpClient.PostAsync(_apiURL, multipartFormContent);
     }
 
-    public async Task GetImageNames()
+    public async Task<Dictionary<string, string>?> GetImagesInfoAsync()
     {
-        var response = await _httpClient.GetAsync(_apiURL);
+        var userName = "Vlad";
 
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(userName));
+        using var content = new StreamContent(stream);
+
+        var response = await _httpClient.PostAsync($"{_apiURL}api/images/get/names-with-categories", content);
         var jsonString = await response.Content.ReadAsStringAsync();
 
-        if(jsonString != null)
-        {
+        Dictionary<string, string>? dictionary = null;
+        JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
 
+        if (jsonString != null)
+        {
+            dictionary = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
         }
+
+        return dictionary;
     }
 }

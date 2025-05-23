@@ -2,7 +2,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:CloudPhotoStorage.UI.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:DataType="vm:RegistrationViewModel"
              x:Class="CloudPhotoStorage.UI.Views.RegistrationView">
-	Registration View
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Width="300"
+                    Spacing="10">
+
+			<TextBlock Text="Логин" FontSize="18" HorizontalAlignment="Left"/>
+			<TextBox Watermark="Введите логин"
+                     Text="{Binding Login}"
+                     HorizontalAlignment="Stretch"
+                     MinWidth="200"/>
+
+			<TextBlock Text="Пароль" FontSize="18" HorizontalAlignment="Left"/>
+			<TextBox Watermark="Введите пароль"
+                     Text="{Binding Password}"
+                     HorizontalAlignment="Stretch"
+                     MinWidth="200"
+                     PasswordChar="*"/>
+
+			<TextBlock Text="Роль" FontSize="18" HorizontalAlignment="Left"/>
+			<ComboBox ItemsSource="{Binding AvailableRoles}"
+                      SelectedItem="{Binding Role}"
+                      HorizontalAlignment="Stretch"
+                      MinWidth="200"
+                      PlaceholderText="Выберите роль"/>
+
+			<StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Left"
+                        Spacing="10">
+				<Button Content="Назад" Command="{Binding BackCommand}" MinWidth="145"/>
+				<Button Content="Регистрация" Command="{Binding RegisterCommand}" MinWidth="145"/>
+			</StackPanel>
+		</StackPanel>
+	</Grid>
 </UserControl>

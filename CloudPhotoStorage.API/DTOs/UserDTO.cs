@@ -2,9 +2,8 @@
 {
     public record UserDTO
     {
-        public string LoginString { get; init; }
-        public string PasswordHash { get; init; }
-        public string PasswordSalt { get; init; }
-        public string RoleID { get; init; }
+        public required string Login { get; set; }
+        public required string Password { get; set; }
+        public required string Role { get; set; }
     }
 }
