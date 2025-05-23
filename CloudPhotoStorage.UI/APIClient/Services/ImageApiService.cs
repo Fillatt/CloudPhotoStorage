@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -42,12 +43,15 @@ public class ImageApiService
 
     public async Task<Dictionary<string, string>?> GetImagesInfoAsync()
     {
-        var response = await _httpClient.GetAsync($"{_apiURL}api/images/get/names-with-categories");
+        var userName = "Vlad";
 
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(userName));
+        using var content = new StreamContent(stream);
+
+        var response = await _httpClient.PostAsync($"{_apiURL}api/images/get/names-with-categories", content);
         var jsonString = await response.Content.ReadAsStringAsync();
 
         Dictionary<string, string>? dictionary = null;
-
         JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
 
         if (jsonString != null)

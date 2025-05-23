@@ -197,20 +197,17 @@ namespace CloudPhotoStorage.API.Controllers
         }
 
         /// <summary>
-        /// Получить имена изображений с категориями
+        /// Получить имена изображений с категориями указанного пользователя
         /// </summary>
-        [HttpGet]
-        [Route("api/images/get/names-with-categories")]
-        public async Task<ActionResult<Dictionary<string, string>>> GetImageNamesWithCategories(CancellationToken cancellationToken)
+        [HttpPost]
+        [Route("api/images/get/names-with-categories/{userId:guid}")]
+        public async Task<ActionResult<Dictionary<string, string>>> GetImageNamesWithCategories(
+            Guid userId,
+            CancellationToken cancellationToken)
         {
             try
             {
-                if (string.IsNullOrEmpty(User.Identity?.Name))
-                {
-                    return Unauthorized();
-                }
-
-                var result = await _imageRepo.GetUserImagesWithCategoriesAsync(User.Identity.Name, cancellationToken);
+                var result = await _imageRepo.GetUserImagesWithCategoriesAsync(userId, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)
