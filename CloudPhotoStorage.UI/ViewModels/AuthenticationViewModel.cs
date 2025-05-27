@@ -34,6 +34,8 @@ public class AuthenticationViewModel : ViewModelBase
         _registrationViewModel = registrationViewModel;
 
         _loginView = new LoginView() { DataContext = _loginViewModel };
+        _registrationViewModel.LoginSelected += OnLoginSelected;
+
         _registrationView = new RegistrationView() { DataContext = _registrationViewModel };
 
         CurrentView = _loginView;
@@ -42,5 +44,10 @@ public class AuthenticationViewModel : ViewModelBase
     public void OnRegistrationSelected(object? sender, EventArgs eventArgs)
     {
         CurrentView = _registrationView;
+    }
+
+    public void OnLoginSelected(object? sender, EventArgs eventArgs)
+    {
+        CurrentView = _loginView;
     }
 }

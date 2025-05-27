@@ -32,18 +32,15 @@
                      MinWidth="200"
                      PasswordChar="*"/>
 
-			<TextBlock Text="Роль" FontSize="18" HorizontalAlignment="Left"/>
-			<ComboBox ItemsSource="{Binding AvailableRoles}"
-                      SelectedItem="{Binding Role}"
-                      HorizontalAlignment="Stretch"
-                      MinWidth="200"
-                      PlaceholderText="Выберите роль"/>
-
 			<StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left"
                         Spacing="10">
-				<Button Content="Назад" MinWidth="145"/>
-				<Button Content="Регистрация" Command="{Binding Commands.Registration}" MinWidth="145"/>
+				<Button Content="Назад" 
+						MinWidth="145"
+						Command="{Binding Commands.GoBack}"/>
+				<Button Content="Регистрация" 
+						Command="{Binding Commands.Registration}" 
+						MinWidth="145"/>
 			</StackPanel>
 		</StackPanel>
 	</Grid>

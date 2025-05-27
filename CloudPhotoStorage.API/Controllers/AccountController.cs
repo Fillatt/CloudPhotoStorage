@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using CloudPhotoStorage.API.Services;
+using CloudPhotoStorage.DataBase.Repositories;
 
 namespace CloudPhotoStorage.API.Controllers
 {
@@ -13,19 +15,21 @@ namespace CloudPhotoStorage.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly ApplicationContext _context;
+        private UserRepo _userRepo;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(ApplicationContext context, ILogger<AccountController> logger)
+        public AccountController(ApplicationContext context, UserRepo userRepo, ILogger<AccountController> logger)
         {
             _context = context;
             _logger = logger;
+            _userRepo = userRepo;
         }
 
         // POST api/account/registration
         // Регистрация нового пользователя
         [HttpPost]
         [Route("api/account/registration")]
-        public async Task<IActionResult> RegisterAsync()
+        public async Task<IActionResult> RegisterAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -38,14 +42,15 @@ namespace CloudPhotoStorage.API.Controllers
                 }
 
                 // Генерация соли и хеша пароля
-                var salt = GenerateSalt();
-                var passwordHash = HashPassword(userDto.Password, salt);
+                byte[] passwordHash = [];
+                byte[] passwordSalt = [];
+                PasswordHasher.CreatePasswordHash(userDto.Password, out passwordHash, out passwordSalt);
 
                 var user = new User
                 {
                     Login = userDto.Login,
                     PasswordHash = passwordHash,
-                    PasswordSalt = Convert.ToBase64String(salt),
+                    PasswordSalt = passwordSalt,
                     //RoleID = userDto.RoleID 
                 };
 
@@ -71,61 +76,48 @@ namespace CloudPhotoStorage.API.Controllers
 
         // GET api/account/login
         // Аутентификация пользователя
-        [HttpGet]
+        [HttpPost]
         [Route("api/account/login")]
-        public async Task<IActionResult> Login([FromQuery] string login, [FromQuery] string password)
+        public async Task<IActionResult> Login(CancellationToken cancellationToken)
         {
             try
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login);
-                if (user == null)
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
+
+                var user = await _userRepo.GetByLoginAsync(userDto.Login, new CancellationToken());
+                if (user != null)
                 {
-                    return NotFound("Пользователь не найден");
+                    // Проверка пароля
+
+                    var passwordHash = user.PasswordHash;
+                    var passwordSalt = user.PasswordSalt;
+
+                    if (!PasswordHasher.VerifyPasswordHash(userDto.Password, passwordHash, passwordSalt))
+                    {
+                        return Unauthorized("Неверный пароль");
+                    }
+                    else
+                    {
+                        // Логирование в историю посещений
+                        _context.LoginHistories.Add(new LoginHistory
+                        {
+                            UserId = user.UserId,
+                            LoginDate = DateTime.UtcNow
+                        });
+
+                        return Ok(new { Message = "Аутентификация успешна", RoleID = user.RoleID });
+                    }
                 }
-
-                // Проверка пароля
-                var salt = Convert.FromBase64String(user.PasswordSalt);
-                var inputHash = HashPassword(password, salt);
-
-                if (inputHash != user.PasswordHash)
+                else
                 {
-                    return Unauthorized("Неверный пароль");
+                    string message = $"Пользователь с именем \"{userDto.Login}\" не существует.";
+                    return Unauthorized(message);
                 }
-
-                // Логирование в историю посещений
-                _context.LoginHistories.Add(new LoginHistory
-                {
-                    UserId = user.UserId,
-                    LoginDate = DateTime.UtcNow
-                });
-                await _context.SaveChangesAsync();
-
-                return Ok(new { Message = "Аутентификация успешна", RoleID = user.RoleID });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при аутентификации пользователя");
                 return StatusCode(500, "Внутренняя ошибка сервера");
-            }
-        }
-
-        private static byte[] GenerateSalt()
-        {
-            byte[] salt = new byte[16];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(salt);
-            }
-            return salt;
-        }
-
-        private static string HashPassword(string password, byte[] salt)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                var saltedPassword = Encoding.UTF8.GetBytes(password).Concat(salt).ToArray();
-                var hash = sha256.ComputeHash(saltedPassword);
-                return Convert.ToBase64String(hash);
             }
         }
     }

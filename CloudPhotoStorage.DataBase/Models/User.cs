@@ -11,8 +11,8 @@ namespace CloudPhotoStorage.DataBase.Models
         [ForeignKey("RoleID")]
         public Guid RoleID { get; set; }
 
-        public string Login { get; set; }
-        public string PasswordHash { get; set; }
-        public string PasswordSalt { get; set; }
+        public required string Login { get; set; }
+        public required byte[] PasswordHash { get; set; }
+        public required byte[] PasswordSalt { get; set; }
     }
 }

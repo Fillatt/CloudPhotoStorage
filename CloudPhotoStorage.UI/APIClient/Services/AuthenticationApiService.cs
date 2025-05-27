@@ -18,10 +18,15 @@ public class AuthenticationApiService
         _apiURL = section.Value;
     }
 
-    public async Task RegistrationAsync(AccountDTO account)
+    public async Task<bool> RegistrationAsync(AccountDTO account)
     {
-        var content = JsonContent.Create(account);  
+        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_apiURL}api/account/registration", account);
+        return response.IsSuccessStatusCode;
+    }
 
-        var test = await _httpClient.PostAsync($"{_apiURL}api/account/registration", content);
+    public async Task<bool> LoginAsync(AccountDTO account)
+    {
+        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_apiURL}api/account/login", account);
+        return response.IsSuccessStatusCode;
     }
 }

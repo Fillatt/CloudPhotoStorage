@@ -12,15 +12,15 @@ namespace CloudPhotoStorage.DataBase.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _dbContext.Users
+            return _dbContext.Users
                 .FirstOrDefaultAsync(u => u.UserId == id, cancellationToken);
         }
 
-        public async Task<User> GetByLoginAsync(string login, CancellationToken cancellationToken)
+        public Task<User?> GetByLoginAsync(string login, CancellationToken cancellationToken)
         {
-            return await _dbContext.Users
+            return _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Login == login, cancellationToken);
         }
 
@@ -52,17 +52,6 @@ namespace CloudPhotoStorage.DataBase.Repositories
         {
             return await _dbContext.Users
                 .AnyAsync(u => u.Login == login, cancellationToken);
-        }
-
-        public async Task UpdatePasswordAsync(Guid userId, string newPasswordHash, string newPasswordSalt, CancellationToken cancellationToken)
-        {
-            var user = await GetByIdAsync(userId, cancellationToken);
-            if (user != null)
-            {
-                user.PasswordHash = newPasswordHash;
-                user.PasswordSalt = newPasswordSalt;
-                await UpdateAsync(user, cancellationToken);
-            }
         }
     }
 }

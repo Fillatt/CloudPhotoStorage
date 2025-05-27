@@ -21,5 +21,8 @@ public partial class RegistrationViewModel
     {
         public ReactiveCommand<Unit, Task> Registration
             => ReactiveCommand.Create(loginViewModel.RegistrationAsync);
+
+        public ReactiveCommand<Unit, Unit> GoBack 
+            => ReactiveCommand.Create(loginViewModel.GoBack);
     }
 }

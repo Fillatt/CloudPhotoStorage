@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using System.Reactive;
+using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
@@ -20,5 +21,8 @@ public partial class LoginViewModel
     {
         public ReactiveCommand<Unit, Unit> Register 
             => ReactiveCommand.Create(loginViewModel.Register);
+
+        public ReactiveCommand<Unit, Task> Login
+            => ReactiveCommand.Create(loginViewModel.LoginAsync);
     }
 }
