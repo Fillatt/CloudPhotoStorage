@@ -20,16 +20,27 @@ public class AuthenticationViewModel : ViewModelBase
 
     private UserControl _currentView;
 
+    private bool _isLogined = false;
+
+    public event EventHandler? Logined;
+
     public UserControl CurrentView 
     { 
         get => _currentView; 
         set => this.RaiseAndSetIfChanged(ref _currentView, value); 
     }
 
+    public bool IsLogined
+    {
+        get => _isLogined;
+        set => this.RaiseAndSetIfChanged(ref _isLogined, value);
+    }
+
     public AuthenticationViewModel(LoginViewModel loginViewModel, RegistrationViewModel registrationViewModel)
     {
         _loginViewModel = loginViewModel;
         _loginViewModel.RegistrationSelected += OnRegistrationSelected;
+        _loginViewModel.Logined += OnLogined;
 
         _registrationViewModel = registrationViewModel;
 
@@ -41,6 +52,11 @@ public class AuthenticationViewModel : ViewModelBase
         CurrentView = _loginView;
     }
 
+    private void _loginViewModel_Logined(object? sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
     public void OnRegistrationSelected(object? sender, EventArgs eventArgs)
     {
         CurrentView = _registrationView;
@@ -49,5 +65,10 @@ public class AuthenticationViewModel : ViewModelBase
     public void OnLoginSelected(object? sender, EventArgs eventArgs)
     {
         CurrentView = _loginView;
+    }
+
+    public void OnLogined(object? sender, EventArgs eventArgs)
+    {
+        Logined?.Invoke(sender, eventArgs);
     }
 }

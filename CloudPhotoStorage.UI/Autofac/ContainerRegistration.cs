@@ -9,7 +9,6 @@ public static class ContainerRegistration
     {
         containerBuilder
             .RegisterModule<ViewModelsModule>()
-            .RegisterModule<SectionsModule>()
             .RegisterModule<ServicesModule>();
 
         return containerBuilder;

@@ -102,11 +102,12 @@ namespace CloudPhotoStorage.API.Controllers
         /// </summary>
         [HttpPost]
         [Route("api/images/post")]
-        public async Task<ActionResult<ImageDTO>> UploadImage([FromBody] ImageDTO imageDto, CancellationToken cancellationToken)
+        public async Task<ActionResult<ImageDTO>> UploadImage(CancellationToken cancellationToken)
         {
             try
             {
-                if (imageDto.ImagePath == null || imageDto.ImagePath.Length == 0)
+                var imageDto = await HttpContext.Request.ReadFromJsonAsync<ImageDTO>();
+                if (imageDto?.ImagePath == null || imageDto.ImagePath.Length == 0)
                 {
                     return BadRequest("Изображение обязательно");
                 }
@@ -201,12 +202,22 @@ namespace CloudPhotoStorage.API.Controllers
         /// </summary>
         [HttpPost]
         [Route("api/images/get/names-with-categories")]
-        public async Task<ActionResult<Dictionary<string, string>>> GetImageNamesWithCategories(CancellationToken cancellationToken)
+        public async Task<ActionResult<List<ImageWithCategoryDto>>> GetImageNamesWithCategories(CancellationToken cancellationToken)
         {
             try
             {
-                var userName = await new StreamReader(HttpContext.Response.Body).ReadToEndAsync();
-                var result = await _imageRepo.GetUserImagesWithCategoriesAsync(userName, cancellationToken);
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
+                // Получаем словарь из репозитория
+                var imagesDict = await _imageRepo.GetUserImagesWithCategoriesAsync(userDto?.Login, cancellationToken);
+
+                var result = imagesDict
+                    .Select(x => new ImageWithCategoryDto
+                    {
+                        ImageName = x.Key,
+                        Category = x.Value
+                    })
+                    .ToList();
+
                 return Ok(result);
             }
             catch (Exception ex)

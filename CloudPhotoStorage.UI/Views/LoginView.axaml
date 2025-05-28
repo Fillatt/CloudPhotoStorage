@@ -11,6 +11,12 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+		<TextBlock Grid.Row="0"
+				   FontSize="20"
+				   VerticalAlignment="Center"
+				   HorizontalAlignment="Center"
+				   Text="Авторизация"/>
+		
         <StackPanel Grid.Row="1"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
@@ -21,24 +27,30 @@
             <TextBox Watermark="Введите логин"
                      Text="{Binding Login}"
                      HorizontalAlignment="Stretch"
-                     MinWidth="200"/>
+                     MinWidth="200"
+					 IsEnabled="{Binding IsEnabled}"/>
 
             <TextBlock Text="Пароль" FontSize="18" HorizontalAlignment="Left"/>
             <TextBox Watermark="Введите пароль"
                      Text="{Binding Password}"
                      HorizontalAlignment="Stretch"
                      MinWidth="200"
-                     PasswordChar="*"/>
+                     PasswordChar="*"
+					 IsEnabled="{Binding IsEnabled}"/>
 
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left"
                         Spacing="10">
                 <Button Content="Войти" 
 						MinWidth="145"
-						Command="{Binding Commands.Login}"/>
+						Command="{Binding Commands.Login}"
+						HorizontalContentAlignment="Center"
+						IsEnabled="{Binding IsEnabled}"/>
                 <Button Content="Регистрация" 
 						Command="{Binding Commands.Register}" 
-						MinWidth="145"/>
+						MinWidth="145"
+						HorizontalContentAlignment="Center"
+						IsEnabled="{Binding IsEnabled}"/>
             </StackPanel>
         </StackPanel>
     </Grid>

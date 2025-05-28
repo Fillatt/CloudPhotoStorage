@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Tmds.DBus.Protocol;
@@ -14,6 +15,7 @@ namespace CloudPhotoStorage.UI.ViewModels;
 
 public partial class RegistrationViewModel : ViewModelBase
 {
+    #region Fields
     private string _login;
 
     private string _password;
@@ -22,8 +24,14 @@ public partial class RegistrationViewModel : ViewModelBase
 
     private AuthenticationApiService _authenticationApiService;
 
-    public event EventHandler<EventArgs> LoginSelected;
+    private bool _isEnabled = true;
+    #endregion
 
+    #region Events
+    public event EventHandler<EventArgs> LoginSelected;
+    #endregion
+
+    #region Public Fields
     public string Login 
     { 
         get => _login; 
@@ -42,15 +50,26 @@ public partial class RegistrationViewModel : ViewModelBase
 
     public IEnumerable<string> AvailableRoles { get; } = ["Пользователь", "Администратор"];
 
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
+    }
+    #endregion
+
+    #region Constructors
     public RegistrationViewModel(AuthenticationApiService authenticationApiService)
     {
         _authenticationApiService = authenticationApiService;
 
         _role = AvailableRoles.First();
     }
-    
+    #endregion
+
+    #region Public Methods
     public async Task RegistrationAsync()
     {
+        IsEnabled = false;
         if (IsValidated())
         {
             var account = new AccountDTO
@@ -60,25 +79,23 @@ public partial class RegistrationViewModel : ViewModelBase
                 Role = Role
             };
 
-            if (!await _authenticationApiService.RegistrationAsync(account))
-            {
-                string message = $"Пользователь с именем \"{Login}\" существует."; 
-                await ShowMessageAsync("Ошибка", message);
-            }
-            else
-            {
-                string message = $"Пользователь с именем \"{Login}\" успешно зарегистрирован.";
-                await ShowMessageAsync("Внимание", message);
-            }
+            await TryRegisterAsync(account);
         }
         else
         {
             await ShowMessageAsync("Ошибка", "Пароль или имя не могут быть пустым");
         }
+        IsEnabled = true;
     }
 
-    public void GoBack() => LoginSelected.Invoke(this, new EventArgs());
+    public void GoBack()
+    {
+        LoginSelected.Invoke(this, new EventArgs());
+        ResetLoginAndPassword();
+    }
+    #endregion
 
+    #region Private Methods
     private bool IsValidated() => !IsLoginEmpty() && !IsPasswordEmpty();
 
     private bool IsLoginEmpty() => _login == string.Empty || _login == null;
@@ -93,4 +110,30 @@ public partial class RegistrationViewModel : ViewModelBase
             if(desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
         }
     }
+
+    private async Task TryRegisterAsync(AccountDTO account)
+    {
+        try
+        {
+            if (!await _authenticationApiService.RegistrationAsync(account))
+            {
+                string message = $"Пользователь с именем \"{Login}\" существует.";
+                await ShowMessageAsync("Ошибка", message);
+            }
+            else
+            {
+                string message = $"Пользователь с именем \"{Login}\" успешно зарегистрирован.";
+                await ShowMessageAsync("Внимание", message);
+                ResetLoginAndPassword();
+            }
+        }
+        catch { await ShowMessageAsync("Ошибка", "Отсуствует соединение с сервисом."); }
+    }
+
+    private void ResetLoginAndPassword()
+    {
+        Login = string.Empty;
+        Password = string.Empty;
+    }
+    #endregion
 }
