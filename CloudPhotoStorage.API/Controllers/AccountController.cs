@@ -17,7 +17,7 @@ namespace CloudPhotoStorage.API.Controllers
         private readonly ApplicationContext _context;
         private UserRepo _userRepo;
         private readonly ILogger<AccountController> _logger;
-
+            
         public AccountController(ApplicationContext context, UserRepo userRepo, ILogger<AccountController> logger)
         {
             _context = context;
