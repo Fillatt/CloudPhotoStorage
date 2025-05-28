@@ -102,10 +102,11 @@ namespace CloudPhotoStorage.API.Controllers
         /// </summary>
         [HttpPost]
         [Route("api/images/post")]
-        public async Task<ActionResult<ImageDTO>> UploadImage([FromBody] ImageDTO imageDto, CancellationToken cancellationToken)
+        public async Task<ActionResult<ImageDTO>> UploadImage(CancellationToken cancellationToken)
         {
             try
             {
+                var imageDto = await HttpContext.Request.ReadFromJsonAsync<ImageDTO>();
                 if (imageDto.ImagePath == null || imageDto.ImagePath.Length == 0)
                 {
                     return BadRequest("Изображение обязательно");
