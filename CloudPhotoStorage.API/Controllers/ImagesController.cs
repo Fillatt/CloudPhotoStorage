@@ -107,7 +107,7 @@ namespace CloudPhotoStorage.API.Controllers
             try
             {
                 var imageDto = await HttpContext.Request.ReadFromJsonAsync<ImageDTO>();
-                if (imageDto.ImagePath == null || imageDto.ImagePath.Length == 0)
+                if (imageDto?.ImagePath == null || imageDto.ImagePath.Length == 0)
                 {
                     return BadRequest("Изображение обязательно");
                 }
@@ -208,7 +208,7 @@ namespace CloudPhotoStorage.API.Controllers
             {
                 var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
                 // Получаем словарь из репозитория
-                var imagesDict = await _imageRepo.GetUserImagesWithCategoriesAsync(userDto.Login, cancellationToken);
+                var imagesDict = await _imageRepo.GetUserImagesWithCategoriesAsync(userDto?.Login, cancellationToken);
 
                 var result = imagesDict
                     .Select(x => new ImageWithCategoryDto
