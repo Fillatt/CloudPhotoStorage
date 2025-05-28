@@ -1,4 +1,5 @@
-﻿using CloudPhotoStorage.UI.APIClient.DTO;
+﻿using Avalonia.Controls.ApplicationLifetimes;
+using CloudPhotoStorage.UI.APIClient.DTO;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -28,5 +29,14 @@ public class AuthenticationApiService
     {
         var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_apiURL}api/account/login", account);
         return response.IsSuccessStatusCode;
+    }
+
+    private async Task ShowMessageAsync(string caption, string message)
+    {
+        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
+            if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
+        }
     }
 }

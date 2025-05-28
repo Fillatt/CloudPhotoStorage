@@ -5,17 +5,77 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:vw="using:CloudPhotoStorage.UI.Views"
 		xmlns:sections="using:CloudPhotoStorage.UI.Sections"
+		xmlns:views="using:CloudPhotoStorage.UI.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CloudPhotoStorage.UI.Views.MainWindow"
 		x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="CloudPhotoStorage.UI">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="50"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="120"/>
+			<ColumnDefinition Width="120"/>
+			<ColumnDefinition Width="120"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
 	
+		<ToggleButton Grid.Column="0"
+					  Grid.Row="0"
+					  Content="Фотографии"
+					  VerticalAlignment="Stretch"
+					  HorizontalAlignment="Stretch"
+					  HorizontalContentAlignment="Center"
+					  VerticalContentAlignment="Center"
+					  Command="{Binding PhotoSelectCommand}"
+					  IsChecked="{Binding IsPhotoChecked}"
+					  IsVisible="{Binding IsLogined}"/>
+		<ToggleButton Grid.Column="1"
+					  Grid.Row="0"
+					  Content="Настройки"
+					  VerticalAlignment="Stretch"
+					  HorizontalAlignment="Stretch"
+					  HorizontalContentAlignment="Center"
+					  VerticalContentAlignment="Center"
+					  Command="{Binding ConfigurationSelectCommand}"
+					  IsChecked="{Binding IsConfigurationChecked}"
+					  IsVisible="{Binding IsLogined}"/>
+		<Button Grid.Column="2"
+					  Grid.Row="0"
+					  Content="Выйти"
+					  VerticalAlignment="Stretch"
+					  HorizontalAlignment="Stretch"
+					  HorizontalContentAlignment="Center"
+					  VerticalContentAlignment="Center"
+					  Command="{Binding AuthenticationSelectCommand}"
+					  IsVisible="{Binding IsLogined}"/>
+
+		<StackPanel Grid.Row="0"
+					Grid.Column="3"
+					Orientation="Horizontal"
+					VerticalAlignment="Center"
+					HorizontalAlignment="Right"
+					Margin="0 0 10 0">
+			<TextBlock Text="Пользователь: "
+					   IsVisible="{Binding IsLogined}"/>
+			<TextBlock Text="{Binding UserName}"
+					   IsVisible="{Binding IsLogined}"/>
+		</StackPanel>
+
+		<ContentPresenter Grid.Row="1"
+						  Grid.ColumnSpan="4"
+						  Content="{Binding CurrentView}"/>
+	</Grid>
+	<!--
 	<TabControl ItemsSource="{Binding Tabs}"
 	            SelectedItem="{Binding CurrentTab}">
 		<TabControl.ItemTemplate>
 			<DataTemplate>
-				<TextBlock Text="{Binding Name}"/>
+				<TextBlock Text="{Binding Name}"
+						   IsVisible="{Binding IsLogined}"/>
 			</DataTemplate>
 		</TabControl.ItemTemplate>
 		<TabControl.ContentTemplate>
@@ -24,5 +84,5 @@
 			</DataTemplate>
 		</TabControl.ContentTemplate>
 	</TabControl>
-	
+	-->
 </Window>

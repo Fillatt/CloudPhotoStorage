@@ -8,8 +8,10 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 			 x:DataType="vm:AuthenticationViewModel"
              x:Class="CloudPhotoStorage.UI.Views.AuthenticationView">
-	<StackPanel VerticalAlignment="Center"
-				HorizontalAlignment="Center">
-		<ContentControl Content="{Binding CurrentView}"/>
-	</StackPanel>
+	<Grid RowDefinitions="*">
+		<ContentControl VerticalAlignment="Center"
+						HorizontalAlignment="Center"
+						Content="{Binding CurrentView}"
+						Height="400"/>
+	</Grid>
 </UserControl>
