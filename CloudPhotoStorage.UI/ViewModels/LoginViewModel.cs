@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -13,12 +14,17 @@ namespace CloudPhotoStorage.UI.ViewModels;
 
 public partial class LoginViewModel : ViewModelBase
 {
-    public string _login = string.Empty;
-
-    public string _password = string.Empty;
-
+    #region Fields 
     private AuthenticationApiService _authenticationApiService;
 
+    private string _login = string.Empty;
+
+    private string _password = string.Empty;
+
+    private bool _isEnabled = true;
+    #endregion
+
+    #region Properties
     public string Login 
     { 
         get => _login;
@@ -31,20 +37,36 @@ public partial class LoginViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _password, value);
     }
 
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
+    }
+    #endregion
+
+    #region Events
     public event EventHandler<EventArgs>? RegistrationSelected;
 
+    public event EventHandler<EventArgs>? Logined;
+    #endregion
+
+    #region Constructors
     public LoginViewModel(AuthenticationApiService authenticationApiService)
     {
         _authenticationApiService = authenticationApiService;
     }
+    #endregion
 
+    #region Public Methods
     public void Register()
     {
         RegistrationSelected?.Invoke(this, EventArgs.Empty);
+        ResetLoginAndPassword();
     }
 
     public async Task LoginAsync()
     {
+        IsEnabled = false;
         if (IsValidated())
         {
             var account = new AccountDTO
@@ -54,22 +76,18 @@ public partial class LoginViewModel : ViewModelBase
                 Role = "Пользователь"
             };
 
-            var IsSuccess = await _authenticationApiService.LoginAsync(account);
-            if(IsSuccess)
-            {
-                await ShowMessageAsync("Внимание", $"Вход в аккаунт \"{Login}\" прошел успешно.");
-            }
-            else
-            {
-                await ShowMessageAsync("Ошибка", "Неверно указано имя пользователя или пароль");
-            }
+            await TryLoginAsync(account);
         }
         else
         {
             await ShowMessageAsync("Ошибка", "Имя пользователя или пароль не могут быть пустыми.");
+            IsEnabled = true;
         }
+        IsEnabled = true;
     }
+    #endregion
 
+    #region Private Methods
     private bool IsValidated() => !IsLoginEmpty() && !IsPasswordEmpty();
 
     private bool IsLoginEmpty() => _login == string.Empty || _login == null;
@@ -84,4 +102,33 @@ public partial class LoginViewModel : ViewModelBase
             if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
         }
     }
+
+    private async Task TryLoginAsync(AccountDTO account)
+    {
+        try
+        {
+            var IsSuccess = await _authenticationApiService.LoginAsync(account);
+            if (IsSuccess)
+            {
+                await ShowMessageAsync("Внимание", $"Вход в аккаунт \"{Login}\" прошел успешно.");
+                Logined?.Invoke(this, new EventArgs());
+                ResetLoginAndPassword();
+            }
+            else
+            {
+                await ShowMessageAsync("Ошибка", "Неверно указано имя пользователя или пароль");
+            }
+        }
+        catch
+        {
+            await ShowMessageAsync("Ошибка", "Отсутсвует соединение с сервером.");
+        }
+    }
+
+    private void ResetLoginAndPassword()
+    {
+        Login = string.Empty;
+        Password = string.Empty;
+    }
+    #endregion
 }
