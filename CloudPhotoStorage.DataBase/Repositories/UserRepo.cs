@@ -25,7 +25,7 @@ namespace CloudPhotoStorage.DataBase.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public Task<User?> GetByLoginAsync(string login, CancellationToken cancellationToken)
+        public Task<User?> GetUserByLoginAsync(string login, CancellationToken cancellationToken)
         {
             return _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Login == login, cancellationToken);

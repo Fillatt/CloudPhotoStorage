@@ -34,57 +34,16 @@ namespace CloudPhotoStorage.API.Controllers
         }
 
         /// <summary>
-        /// Получить все изображения
-        /// </summary>
-        [HttpGet]
-        [Route("api/images/get")]
-        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetAllImages(CancellationToken cancellationToken)
-        {
-            try
-            {
-                var images = await _imageRepo.GetAllAsync(cancellationToken);
-
-                if (images == null || !images.Any())
-                {
-                    return NotFound("Изображения не найдены");
-                }
-
-                var result = new List<ImageDTO>();
-                foreach (var image in images)
-                {
-                    var user = await _userRepo.GetByIdAsync(image.UserId, cancellationToken);
-                    var category = await _categoryRepo.GetByIdAsync(image.CategoryId, cancellationToken);
-
-                    result.Add(new ImageDTO
-                    {
-                        ImagePath = image.ImageBytes,
-                        Name = image.ImageName,
-                        UploadDate = image.UploadDate,
-                        UserLogin = user?.Login ?? "Неизвестно",
-                        CategoryName = category?.CategoryName ?? "Без категории"
-                    });
-                }
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении изображений");
-                return StatusCode(500, "Внутренняя ошибка сервера");
-            }
-        }
-
-        /// <summary>
         /// Получить все изображения конкретного пользователя
         /// </summary>
         [HttpPost]
         [Route("api/images/get-by-user")]
-        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImagesByUser(CancellationToken cancellationToken)
+        public async Task<ActionResult<List<ImageDTO>>> GetImagesByUser(CancellationToken cancellationToken)
         {
             try
             {
                 var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
-                var user = await _userRepo.GetByLoginAsync(userDto.Login, cancellationToken);
+                var user = await _userRepo.GetUserByLoginAsync(userDto.Login, cancellationToken);
 
                 if (user == null)
                 {
@@ -114,10 +73,9 @@ namespace CloudPhotoStorage.API.Controllers
 
                     result.Add(new ImageDTO
                     {
-                        ImagePath = image.ImageBytes,
+                        ImageData = image.ImageBytes,
                         Name = image.ImageName,
                         UploadDate = image.UploadDate,
-                        UserLogin = user.Login,
                         CategoryName = category?.CategoryName ?? "Без категории"
                     });
                 }
@@ -165,7 +123,7 @@ namespace CloudPhotoStorage.API.Controllers
             {
                 var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
                 var imageDto = await HttpContext.Request.ReadFromJsonAsync<ImageDTO>();
-                if (imageDto?.ImagePath == null || imageDto.ImagePath.Length == 0)
+                if (imageDto?.ImageData == null || imageDto.ImageData.Length == 0)
                 {
                     return BadRequest("Изображение обязательно");
                 }
@@ -199,7 +157,7 @@ namespace CloudPhotoStorage.API.Controllers
                 {
                     ImageId = Guid.NewGuid(),
                     ImageName = imageDto.Name,
-                    ImageBytes = imageDto.ImagePath,
+                    ImageBytes = imageDto.ImageData,
                     UploadDate = imageDto.UploadDate ?? DateTime.UtcNow,
                     UserId = userId,
                     CategoryId = categoryId
@@ -214,14 +172,7 @@ namespace CloudPhotoStorage.API.Controllers
                     LoginDate = DateTime.UtcNow
                 }, cancellationToken);
 
-                return CreatedAtAction(nameof(GetImageById), new { id = image.ImageId }, new ImageDTO
-                {
-                    ImagePath = image.ImageBytes,
-                    Name = image.ImageName,
-                    UploadDate = image.UploadDate,
-                    UserLogin = user.Login,
-                    CategoryName = category.CategoryName
-                });
+                return Ok();
             }
             catch (Exception ex)
             {
