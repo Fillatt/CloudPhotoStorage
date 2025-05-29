@@ -1,13 +1,10 @@
-﻿using CloudPhotoStorage.DataBase;
+﻿using CloudPhotoStorage.API.DTOs;
+using CloudPhotoStorage.API.Services;
+using CloudPhotoStorage.DataBase;
 using CloudPhotoStorage.DataBase.Models;
-using CloudPhotoStorage.API.DTOs;
+using CloudPhotoStorage.DataBase.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using CloudPhotoStorage.API.Services;
-using CloudPhotoStorage.DataBase.Repositories;
 
 namespace CloudPhotoStorage.API.Controllers
 {
@@ -17,7 +14,7 @@ namespace CloudPhotoStorage.API.Controllers
         private readonly ApplicationContext _context;
         private UserRepo _userRepo;
         private readonly ILogger<AccountController> _logger;
-            
+
         public AccountController(ApplicationContext context, UserRepo userRepo, ILogger<AccountController> logger)
         {
             _context = context;
@@ -51,7 +48,6 @@ namespace CloudPhotoStorage.API.Controllers
                     Login = userDto.Login,
                     PasswordHash = passwordHash,
                     PasswordSalt = passwordSalt,
-                    //RoleID = userDto.RoleID 
                 };
 
                 _context.Users.Add(user);
@@ -84,7 +80,7 @@ namespace CloudPhotoStorage.API.Controllers
             {
                 var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
 
-                var user = await _userRepo.GetByLoginAsync(userDto.Login, new CancellationToken());
+                var user = await _userRepo.GetUserByLoginAsync(userDto.Login, new CancellationToken());
                 if (user != null)
                 {
                     // Проверка пароля
@@ -105,7 +101,7 @@ namespace CloudPhotoStorage.API.Controllers
                             LoginDate = DateTime.UtcNow
                         });
 
-                        return Ok(new { Message = "Аутентификация успешна", RoleID = user.RoleID });
+                        return Ok(new { Message = "Аутентификация успешна" });
                     }
                 }
                 else

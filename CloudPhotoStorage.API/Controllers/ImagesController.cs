@@ -2,10 +2,11 @@
 using CloudPhotoStorage.DataBase.Models;
 using CloudPhotoStorage.DataBase.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using CloudPhotoStorage.API.Services;
 
 namespace CloudPhotoStorage.API.Controllers
 {
- 
+
     [ApiController]
     public class ImagesController : ControllerBase
     {
@@ -33,15 +34,32 @@ namespace CloudPhotoStorage.API.Controllers
         }
 
         /// <summary>
-        /// Получить все изображения
+        /// Получить все изображения конкретного пользователя
         /// </summary>
-        [HttpGet]
-        [Route("api/images/get")]
-        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetAllImages(CancellationToken cancellationToken)
+        [HttpPost]
+        [Route("api/images/get-by-user")]
+        public async Task<ActionResult<List<ImageDTO>>> GetImagesByUser(CancellationToken cancellationToken)
         {
             try
             {
-                var images = await _imageRepo.GetAllAsync(cancellationToken);
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
+                var user = await _userRepo.GetUserByLoginAsync(userDto.Login, cancellationToken);
+
+                if (user == null)
+                {
+                    return NotFound("Пользователь не найден");
+                }
+
+                // Проверка пароля
+                var passwordHash = user.PasswordHash;
+                var passwordSalt = user.PasswordSalt;
+
+                if (!PasswordHasher.VerifyPasswordHash(userDto.Password, passwordHash, passwordSalt))
+                {
+                    return Unauthorized("Неверный пароль");
+                }
+
+                var images = await _imageRepo.GetByUserIdAsync(user.UserId, cancellationToken);
 
                 if (images == null || !images.Any())
                 {
@@ -51,24 +69,21 @@ namespace CloudPhotoStorage.API.Controllers
                 var result = new List<ImageDTO>();
                 foreach (var image in images)
                 {
-                    var user = await _userRepo.GetByIdAsync(image.UserId, cancellationToken);
                     var category = await _categoryRepo.GetByIdAsync(image.CategoryId, cancellationToken);
 
                     result.Add(new ImageDTO
                     {
-                        ImagePath = image.ImageBytes,
+                        ImageData = image.ImageBytes,
                         Name = image.ImageName,
                         UploadDate = image.UploadDate,
-                        UserLogin = user?.Login ?? "Неизвестно",
                         CategoryName = category?.CategoryName ?? "Без категории"
                     });
                 }
-
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении изображений");
+                _logger.LogError(ex, "Ошибка при получении изображений пользователя");
                 return StatusCode(500, "Внутренняя ошибка сервера");
             }
         }
@@ -106,28 +121,43 @@ namespace CloudPhotoStorage.API.Controllers
         {
             try
             {
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
                 var imageDto = await HttpContext.Request.ReadFromJsonAsync<ImageDTO>();
-                if (imageDto?.ImagePath == null || imageDto.ImagePath.Length == 0)
+                if (imageDto?.ImageData == null || imageDto.ImageData.Length == 0)
                 {
                     return BadRequest("Изображение обязательно");
                 }
 
-                Guid userId = Guid.NewGuid(); // Заменить на реальный ID пользователя
-                Guid categoryId = Guid.NewGuid(); // Заменить на реальный ID категории
+                Guid userId = (Guid)await _userRepo.GetIdByLoginAsync(userDto.Login, cancellationToken);
+                Guid categoryId = (Guid)await _categoryRepo.GetIdByNameAsync(imageDto.CategoryName, cancellationToken);
 
                 var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
                 var category = await _categoryRepo.GetByIdAsync(categoryId, cancellationToken);
-
-                if (user == null || category == null)
+                
+                if (user == null)
                 {
-                    return BadRequest("Неверный пользователь или категория");
+                    return NotFound("Пользователь не найден");
+                }
+
+                if (category == null)
+                {
+                    return NotFound("Категория не найдена");
+                }
+                
+                // Проверка пароля
+                var passwordHash = user.PasswordHash;
+                var passwordSalt = user.PasswordSalt;
+
+                if (!PasswordHasher.VerifyPasswordHash(userDto.Password, passwordHash, passwordSalt))
+                {
+                    return Unauthorized("Неверный пароль");
                 }
 
                 var image = new Image
                 {
                     ImageId = Guid.NewGuid(),
                     ImageName = imageDto.Name,
-                    ImageBytes = imageDto.ImagePath,
+                    ImageBytes = imageDto.ImageData,
                     UploadDate = imageDto.UploadDate ?? DateTime.UtcNow,
                     UserId = userId,
                     CategoryId = categoryId
@@ -142,14 +172,7 @@ namespace CloudPhotoStorage.API.Controllers
                     LoginDate = DateTime.UtcNow
                 }, cancellationToken);
 
-                return CreatedAtAction(nameof(GetImageById), new { id = image.ImageId }, new ImageDTO
-                {
-                    ImagePath = image.ImageBytes,
-                    Name = image.ImageName,
-                    UploadDate = image.UploadDate,
-                    UserLogin = user.Login,
-                    CategoryName = category.CategoryName
-                });
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -169,13 +192,13 @@ namespace CloudPhotoStorage.API.Controllers
                 var image = await _imageRepo.GetByIdAsync(id, cancellationToken);
                 if (image == null)
                 {
-                    return NotFound();
+                    return NotFound("Изображение не найдено");
                 }
 
                 var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
                 if (user == null)
                 {
-                    return BadRequest("Неверный пользователь");
+                    return NotFound("Пользователь не найден");
                 }
 
                 await _wasteBasketRepo.AddAsync(new WasteBasket
@@ -206,9 +229,23 @@ namespace CloudPhotoStorage.API.Controllers
         {
             try
             {
-                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
-                // Получаем словарь из репозитория
-                var imagesDict = await _imageRepo.GetUserImagesWithCategoriesAsync(userDto?.Login, cancellationToken);
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>(); 
+                Guid userId = (Guid)await _userRepo.GetIdByLoginAsync(userDto.Login, cancellationToken);
+                var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
+                if (user == null)
+                {
+                    return NotFound("Пользователь не найден");
+                }
+                // Проверка пароля
+                var passwordHash = user.PasswordHash;
+                var passwordSalt = user.PasswordSalt;
+
+                if (!PasswordHasher.VerifyPasswordHash(userDto.Password, passwordHash, passwordSalt))
+                {
+                    return Unauthorized("Неверный пароль");
+                }
+
+                var imagesDict = await _imageRepo.GetUserImagesWithCategoriesAsync(user.Login, cancellationToken);
 
                 var result = imagesDict
                     .Select(x => new ImageWithCategoryDto

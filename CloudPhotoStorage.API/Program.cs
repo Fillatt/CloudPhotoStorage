@@ -13,7 +13,6 @@ builder.Services.AddDbContext<ApplicationContext>();
 builder.Services.AddScoped<CategoryRepo>();
 builder.Services.AddScoped<ImageRepo>();
 builder.Services.AddScoped<LoginHistoryRepo>();
-builder.Services.AddScoped<RolesRepo>();
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<WasteBasketRepo>();
 

@@ -1,6 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using CloudPhotoStorage.DataBase.Models;
-using System.Threading;
+﻿using CloudPhotoStorage.DataBase.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CloudPhotoStorage.DataBase.Repositories
 {
@@ -42,9 +41,9 @@ namespace CloudPhotoStorage.DataBase.Repositories
                 );
         }
 
-        public async Task<IEnumerable<Image>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        public Task<List<Image>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return await _dbContext.Images
+            return _dbContext.Images
                 .Where(i => i.UserId == userId)
                 .ToListAsync(cancellationToken);
         }
