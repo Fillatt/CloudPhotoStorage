@@ -106,14 +106,15 @@ namespace CloudPhotoStorage.API.Controllers
         {
             try
             {
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
                 var imageDto = await HttpContext.Request.ReadFromJsonAsync<ImageDTO>();
                 if (imageDto?.ImagePath == null || imageDto.ImagePath.Length == 0)
                 {
                     return BadRequest("Изображение обязательно");
                 }
 
-                Guid userId = Guid.NewGuid(); // Заменить на реальный ID пользователя
-                Guid categoryId = Guid.NewGuid(); // Заменить на реальный ID категории
+                Guid userId = (Guid)await _userRepo.GetIdByLoginAsync(userDto.Login, cancellationToken);
+                Guid categoryId = (Guid)await _categoryRepo.GetIdByNameAsync(imageDto.CategoryName, cancellationToken);
 
                 var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
                 var category = await _categoryRepo.GetByIdAsync(categoryId, cancellationToken);
