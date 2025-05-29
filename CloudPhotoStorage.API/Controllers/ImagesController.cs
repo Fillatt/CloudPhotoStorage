@@ -278,9 +278,7 @@ namespace CloudPhotoStorage.API.Controllers
         {
             try
             {
-                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
-                
-                // Получаем словарь из репозитория
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>(); 
                 Guid userId = (Guid)await _userRepo.GetIdByLoginAsync(userDto.Login, cancellationToken);
                 var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
                 if (user == null)
