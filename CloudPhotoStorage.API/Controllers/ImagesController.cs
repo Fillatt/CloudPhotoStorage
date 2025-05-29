@@ -241,13 +241,13 @@ namespace CloudPhotoStorage.API.Controllers
                 var image = await _imageRepo.GetByIdAsync(id, cancellationToken);
                 if (image == null)
                 {
-                    return NotFound();
+                    return NotFound("Изображение не найдено");
                 }
 
                 var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
                 if (user == null)
                 {
-                    return BadRequest("Неверный пользователь");
+                    return NotFound("Пользователь не найден");
                 }
 
                 await _wasteBasketRepo.AddAsync(new WasteBasket
@@ -279,8 +279,24 @@ namespace CloudPhotoStorage.API.Controllers
             try
             {
                 var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
+                
                 // Получаем словарь из репозитория
-                var imagesDict = await _imageRepo.GetUserImagesWithCategoriesAsync(userDto?.Login, cancellationToken);
+                Guid userId = (Guid)await _userRepo.GetIdByLoginAsync(userDto.Login, cancellationToken);
+                var user = await _userRepo.GetByIdAsync(userId, cancellationToken);
+                if (user == null)
+                {
+                    return NotFound("Пользователь не найден");
+                }
+                // Проверка пароля
+                var passwordHash = user.PasswordHash;
+                var passwordSalt = user.PasswordSalt;
+
+                if (!PasswordHasher.VerifyPasswordHash(userDto.Password, passwordHash, passwordSalt))
+                {
+                    return Unauthorized("Неверный пароль");
+                }
+
+                var imagesDict = await _imageRepo.GetUserImagesWithCategoriesAsync(user.Login, cancellationToken);
 
                 var result = imagesDict
                     .Select(x => new ImageWithCategoryDto
