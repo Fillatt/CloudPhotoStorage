@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Autofac;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using CloudPhotoStorage.UI.Views;
 using ReactiveUI;
@@ -10,21 +11,16 @@ using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
+public partial class MainWindowViewModel : ViewModelBase, IScreen
 {
-    private AuthenticationViewModel _authenticationViewModel;
+    #region Fields
+    private LoginViewModel? _loginViewModel;
 
-    private AuthenticationView _authenticationView;
+    private RegistrationViewModel _registrationViewModel;
 
     private PhotoViewModel _photoViewModel;
 
-    private PhotoView _photoView;
-
     private ConfigurationViewModel _configurationViewModel;
-
-    private ConfigurationView _configurationView;
-
-    private UserControl _currentView;
 
     private bool _isLogined;
 
@@ -38,16 +34,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private string _password;
 
+    private IComponentContext _componentContext;
+    #endregion
+
+    #region Properties
     public bool IsLogined
     {
         get => _isLogined;
         set => this.RaiseAndSetIfChanged(ref _isLogined, value);
-    }
-    
-    public UserControl CurrentView
-    {
-        get => _currentView;
-        set => this.RaiseAndSetIfChanged(ref _currentView, value);
     }
 
     public bool IsAuthenticationChecked
@@ -74,33 +68,17 @@ public partial class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _userName, value);
     }
 
-    public ReactiveCommand<Unit, Unit> AuthenticationSelectCommand { get; }
+    public RoutingState Router { get; } = new RoutingState();
+    #endregion
 
-    public ReactiveCommand<Unit, Unit> PhotoSelectCommand { get; }
-
-    public ReactiveCommand<Unit, Unit> ConfigurationSelectCommand { get; }
-
-    public MainWindowViewModel(
-        AuthenticationViewModel authenticationViewModel,
-        PhotoViewModel photoViewModel,
-        ConfigurationViewModel configurationViewModel)
+    #region Constructors
+    public MainWindowViewModel(IComponentContext componentContext)
     {
-        _authenticationViewModel = authenticationViewModel;
-        _authenticationViewModel.Logined += OnLogined;
-        _photoViewModel = photoViewModel;
-        _configurationViewModel = configurationViewModel;
-
-        _authenticationView = new AuthenticationView() { DataContext = _authenticationViewModel };
-        _photoView = new PhotoView() { DataContext = _photoViewModel };
-        _configurationView = new ConfigurationView() { DataContext = _configurationViewModel };
-
-        AuthenticationSelectCommand = ReactiveCommand.Create(AuthenticationSelect);
-        PhotoSelectCommand = ReactiveCommand.Create(PhotoSelect);
-        ConfigurationSelectCommand = ReactiveCommand.Create(ConfigurationSelect);
-
-        AuthenticationSelect();
+        _componentContext = componentContext;
     }
+    #endregion
 
+    #region Public Methods
     public void OnLogined(object? sender, EventArgs args)
     {
         if (sender is LoginViewModel loginViewModel)
@@ -113,32 +91,51 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public void AuthenticationSelect()
+    public IObservable<IRoutableViewModel> Exit()
     {
-        AuthenticationCheck();
-        CurrentView = _authenticationView;
         IsLogined = false;
+        _userName = string.Empty;
+        _password = string.Empty; 
+
+        return LoginSelect();
     }
 
-    public void PhotoSelect()
+    public IObservable<IRoutableViewModel> LoginSelect()
+    {
+        if(_loginViewModel != null) _loginViewModel.Logined -= OnLogined;
+        _loginViewModel = _componentContext.Resolve<LoginViewModel>();
+        _loginViewModel.Logined += OnLogined;
+
+        return Router.Navigate.Execute(_loginViewModel);
+    }
+
+    public IObservable<IRoutableViewModel> RegistrationSelect()
+    {
+        _registrationViewModel = _componentContext.Resolve<RegistrationViewModel>();
+
+        return Router.Navigate.Execute(_registrationViewModel);
+    }
+
+    public IObservable<IRoutableViewModel> PhotoSelect()
     {
         PhotoCheck();
-        CurrentView = _photoView;
+
+        _photoViewModel = _componentContext.Resolve<PhotoViewModel>();
+
+        return Router.Navigate.Execute(_photoViewModel);
     }
 
-    public void ConfigurationSelect()
+    public IObservable<IRoutableViewModel> ConfigurationSelect()
     {
         ConfigurationCheck();
-        CurrentView = _configurationView;
-    }
 
-    private void AuthenticationCheck()
-    {
-        IsAuthenticationChecked = true;
-        IsConfigurationChecked = false;
-        IsPhotoChecked = false;
-    }
+        _configurationViewModel = _componentContext.Resolve<ConfigurationViewModel>();
 
+        return Router.Navigate.Execute(_configurationViewModel);
+    }
+    #endregion
+
+    #region Private Methods
     private void PhotoCheck()
     {
         IsAuthenticationChecked = false;
@@ -152,4 +149,5 @@ public partial class MainWindowViewModel : ViewModelBase
         IsConfigurationChecked = true;
         IsPhotoChecked = false;
     }
+    #endregion
 }

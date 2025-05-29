@@ -19,8 +19,8 @@ public partial class LoginViewModel
 
     public sealed class LoginViewModelCommands(LoginViewModel loginViewModel)
     {
-        public ReactiveCommand<Unit, Unit> Register 
-            => ReactiveCommand.Create(loginViewModel.Register);
+        public ReactiveCommand<Unit, IRoutableViewModel> Register 
+            => ReactiveCommand.CreateFromObservable(loginViewModel.Register);
 
         public ReactiveCommand<Unit, Task> Login
             => ReactiveCommand.Create(loginViewModel.LoginAsync);

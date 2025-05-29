@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
-public class PhotoViewModel : ViewModelBase
+public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
 {
     private ImageApiService _imageApiService;
 
-    private AvaloniaList<ImageInfoDTO> _imageInfoDTO;
+    private List<ImageInfoDTO> _imageInfoDTO;
 
     private ImageInfoDTO _selectedImageInfo;
 
-    public AvaloniaList<ImageInfoDTO> ImagesInfo
+    public List<ImageInfoDTO> ImagesInfo
     {
         get => _imageInfoDTO;
         set => this.RaiseAndSetIfChanged(ref _imageInfoDTO, value);
@@ -30,11 +30,15 @@ public class PhotoViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Task> GetImagesCommand { get; }
 
-    public PhotoViewModel(ImageApiService imageApiService)
+    public string? UrlPathSegment => "PhotoViewModel";
+
+    public IScreen HostScreen { get; }
+
+    public PhotoViewModel(ImageApiService imageApiService, IScreen screen)
     {
         _imageApiService = imageApiService;
-
-        //Dictionary<string, string> dictionary = _imageApiService.GetImagesInfoAsync().Result;
+        HostScreen = screen;
+        
         GetImagesCommand = ReactiveCommand.Create(GetImagesAsync);
     }
 

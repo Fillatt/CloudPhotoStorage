@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using CloudPhotoStorage.UI.ViewModels;
 using CloudPhotoStorage.UI.Views;
+using ReactiveUI;
 
 namespace CloudPhotoStorage.UI.Autofac.Modules;
 
@@ -11,21 +12,29 @@ public class ViewModelsModule : Module
         base.Load(builder);
 
         builder
-            .RegisterType<MainWindowViewModel>();
+            .RegisterType<MainWindowViewModel>()
+            .SingleInstance()
+            .As<IScreen>()
+            .AsSelf();
+            
+        builder
+            .RegisterType<PhotoViewModel>()
+            .As<IRoutableViewModel>()
+            .AsSelf();
 
         builder
-            .RegisterType<AuthenticationViewModel>();
+            .RegisterType<ConfigurationViewModel>()
+            .As<IRoutableViewModel>()
+            .AsSelf();
 
         builder
-            .RegisterType<PhotoViewModel>();
+            .RegisterType<LoginViewModel>()
+            .As<IRoutableViewModel>()
+            .AsSelf();
 
         builder
-            .RegisterType<ConfigurationViewModel>();
-
-        builder
-            .RegisterType<LoginViewModel>();
-
-        builder
-            .RegisterType<RegistrationViewModel>();
+            .RegisterType<RegistrationViewModel>()
+            .As<IRoutableViewModel>()
+            .AsSelf();
     }
 }

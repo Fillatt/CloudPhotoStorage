@@ -1,6 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:CloudPhotoStorage.UI.ViewModels"
+		xmlns:rxui="http://reactiveui.net"
+		xmlns:app="using:CloudPhotoStorage.UI"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:vw="using:CloudPhotoStorage.UI.Views"
@@ -21,6 +23,8 @@
 			<ColumnDefinition Width="120"/>
 			<ColumnDefinition Width="120"/>
 			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="200"/>
+			<ColumnDefinition Width="120"/>
 		</Grid.ColumnDefinitions>
 	
 		<ToggleButton Grid.Column="0"
@@ -30,7 +34,7 @@
 					  HorizontalAlignment="Stretch"
 					  HorizontalContentAlignment="Center"
 					  VerticalContentAlignment="Center"
-					  Command="{Binding PhotoSelectCommand}"
+					  Command="{Binding Commands.PhotoSelect}"
 					  IsChecked="{Binding IsPhotoChecked}"
 					  IsVisible="{Binding IsLogined}"/>
 		<ToggleButton Grid.Column="1"
@@ -40,49 +44,37 @@
 					  HorizontalAlignment="Stretch"
 					  HorizontalContentAlignment="Center"
 					  VerticalContentAlignment="Center"
-					  Command="{Binding ConfigurationSelectCommand}"
+					  Command="{Binding Commands.ConfigurationSelect}"
 					  IsChecked="{Binding IsConfigurationChecked}"
-					  IsVisible="{Binding IsLogined}"/>
-		<Button Grid.Column="2"
-					  Grid.Row="0"
-					  Content="Выйти"
-					  VerticalAlignment="Stretch"
-					  HorizontalAlignment="Stretch"
-					  HorizontalContentAlignment="Center"
-					  VerticalContentAlignment="Center"
-					  Command="{Binding AuthenticationSelectCommand}"
 					  IsVisible="{Binding IsLogined}"/>
 
 		<StackPanel Grid.Row="0"
-					Grid.Column="3"
+					Grid.Column="4"
 					Orientation="Horizontal"
 					VerticalAlignment="Center"
-					HorizontalAlignment="Right"
+					HorizontalAlignment="Center"
 					Margin="0 0 10 0">
 			<TextBlock Text="Пользователь: "
 					   IsVisible="{Binding IsLogined}"/>
 			<TextBlock Text="{Binding UserName}"
 					   IsVisible="{Binding IsLogined}"/>
 		</StackPanel>
+		<Button Grid.Column="5"
+				Grid.Row="0"
+				Content="Выйти"
+				VerticalAlignment="Stretch"
+				HorizontalAlignment="Stretch"
+				HorizontalContentAlignment="Center"
+				VerticalContentAlignment="Center"
+				Command="{Binding Commands.Exit}"
+				IsVisible="{Binding IsLogined}"/>
 
-		<ContentPresenter Grid.Row="1"
-						  Grid.ColumnSpan="4"
-						  Content="{Binding CurrentView}"/>
+		<rxui:RoutedViewHost Grid.Row="1"
+							 Grid.ColumnSpan="6"
+							 Router="{Binding Router}">
+			<rxui:RoutedViewHost.ViewLocator>
+				<app:AppViewLocator />
+			</rxui:RoutedViewHost.ViewLocator>
+		</rxui:RoutedViewHost>
 	</Grid>
-	<!--
-	<TabControl ItemsSource="{Binding Tabs}"
-	            SelectedItem="{Binding CurrentTab}">
-		<TabControl.ItemTemplate>
-			<DataTemplate>
-				<TextBlock Text="{Binding Name}"
-						   IsVisible="{Binding IsLogined}"/>
-			</DataTemplate>
-		</TabControl.ItemTemplate>
-		<TabControl.ContentTemplate>
-			<DataTemplate x:DataType="sections:IMenuSection">
-				<ContentPresenter Content="{Binding View}"/>
-			</DataTemplate>
-		</TabControl.ContentTemplate>
-	</TabControl>
-	-->
 </Window>
