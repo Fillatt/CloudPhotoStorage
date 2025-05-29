@@ -12,10 +12,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<Image> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public Task<Image?> GetImageByNameAsync(string imageName, CancellationToken cancellationToken)
         {
-            return await _dbContext.Images
-                .FirstOrDefaultAsync(i => i.ImageId == id, cancellationToken);
+            return _dbContext.Images
+                .FirstOrDefaultAsync(i => i.ImageName == imageName, cancellationToken);
         }
 
         public async Task<Dictionary<string, string>> GetUserImagesWithCategoriesAsync(string username, CancellationToken cancellationToken)
@@ -85,9 +85,9 @@ namespace CloudPhotoStorage.DataBase.Repositories
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteById(Guid id, CancellationToken cancellationToken)
+        public async Task DeleteImageByName(string name, CancellationToken cancellationToken)
         {
-            var image = await GetByIdAsync(id, cancellationToken);
+            var image = await GetImageByNameAsync(name, cancellationToken);
             if (image != null)
             {
                 await DeleteAsync(image, cancellationToken);

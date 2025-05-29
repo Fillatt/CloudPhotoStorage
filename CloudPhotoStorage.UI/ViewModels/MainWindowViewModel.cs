@@ -68,6 +68,8 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
         set => this.RaiseAndSetIfChanged(ref _userName, value);
     }
 
+    public string Password => _password;
+
     public RoutingState Router { get; } = new RoutingState();
     #endregion
 

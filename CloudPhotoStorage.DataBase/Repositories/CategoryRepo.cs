@@ -11,14 +11,14 @@ namespace CloudPhotoStorage.DataBase.Repositories
         {
             _dbContext = dbContext;
         }
-        public async Task<Category> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public Task<Category?> GetCategoryByIdAsync(Guid? id, CancellationToken cancellationToken)
         {
-            return await _dbContext.Categories
+            return _dbContext.Categories
                 .FirstOrDefaultAsync(c => c.CategoryId == id, cancellationToken);
         }
-        public async Task<Guid?> GetIdByNameAsync(string name, CancellationToken cancellationToken)
+        public Task<Guid?> GetCategoryIdByNameAsync(string name, CancellationToken cancellationToken)
         {
-            return await _dbContext.Categories
+            return _dbContext.Categories
                 .Where(c => c.CategoryName == name)
                 .Select(c => (Guid?)c.CategoryId)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -55,7 +55,7 @@ namespace CloudPhotoStorage.DataBase.Repositories
 
         public async Task DeleteByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var category = await GetByIdAsync(id, cancellationToken);
+            var category = await GetCategoryByIdAsync(id, cancellationToken);
             if (category != null)
             {
                 await DeleteAsync(category, cancellationToken);

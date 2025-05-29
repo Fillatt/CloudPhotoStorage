@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +23,10 @@ public partial class PhotoViewModel
 
     public sealed class PhotoViewModelCommands(PhotoViewModel photoViewModel)
     {
-        
+        public ReactiveCommand<Unit, Task> SendImage =>
+            ReactiveCommand.Create(photoViewModel.SendImageAsync);
+
+        public ReactiveCommand<Unit, Task> GetImagesInfo =>
+           ReactiveCommand.Create(photoViewModel.GetImagesInfoAsync);
     }
 }

@@ -12,7 +12,7 @@ namespace CloudPhotoStorage.DataBase.Repositories
             _dbContext = dbContext;
         }
 
-        public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public Task<User?> GetUserByIdAsync(Guid? id, CancellationToken cancellationToken)
         {
             return _dbContext.Users
                 .FirstOrDefaultAsync(u => u.UserId == id, cancellationToken);

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -24,41 +25,41 @@ public class ImageApiService
         _apiURL = section.Value;
     }
 
-    public async Task SendImageAsync(ImageDTO imageDTO)
+    public async Task SendImageAsync(SendImageDTO sendImageDTO)
     {
         using var multipartFormContent = new MultipartFormDataContent();
 
-        multipartFormContent.Add(new StringContent(imageDTO.Name), "Name");
-        multipartFormContent.Add(new StringContent(imageDTO.UserLogin), "UserLogin");
-        multipartFormContent.Add(new StringContent(imageDTO.CategoryName), "CategoryName");
-        multipartFormContent.Add(new StringContent(imageDTO.UploadDate.ToString()), "UploadDate");
+        multipartFormContent.Add(new StringContent(sendImageDTO.Login), "Login");
+        multipartFormContent.Add(new StringContent(sendImageDTO.Password), "Password");
 
-        var imageContent = new ByteArrayContent(imageDTO.Bytes);
+        multipartFormContent.Add(new StringContent(sendImageDTO.Name), "Name");
+        multipartFormContent.Add(new StringContent(sendImageDTO.CategoryName), "CategoryName");
+        multipartFormContent.Add(new StringContent(sendImageDTO.UploadDate.ToString()), "UploadDate");
+
+        var memoruStream = new MemoryStream(sendImageDTO.ImageData);
+        var imageContent = new StreamContent(memoruStream);
+
         imageContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
 
-        multipartFormContent.Add(imageContent, "ImageBytes");
+        multipartFormContent.Add(imageContent, "ImageData", "ImageData");
 
-        var response = await _httpClient.PostAsync(_apiURL, multipartFormContent);
+        var response = await _httpClient.PostAsync($"{_apiURL}api/images/post", multipartFormContent);
     }
 
-    public async Task<Dictionary<string, string>?> GetImagesInfoAsync()
+    public async Task<List<ImageInfoDTO>?> GetImagesInfoAsync(AccountDTO accountDTO)
     {
-        var userName = "Vlad";
+        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_apiURL}api/images/get/names-with-categories", accountDTO);
+        List<ImageInfoDTO>? list = await response.Content.ReadFromJsonAsync<List<ImageInfoDTO>>();
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(userName));
-        using var content = new StreamContent(stream);
+        return list;
+    }
 
-        var response = await _httpClient.PostAsync($"{_apiURL}api/images/get/names-with-categories", content);
-        var jsonString = await response.Content.ReadAsStringAsync();
+    public async Task<ImageDTO?> GetImageAsync(GetImageDTO getImageDTO)
+    {
+        var response = await _httpClient.PostAsJsonAsync<GetImageDTO>($"{_apiURL}api/image/get", getImageDTO);
 
-        Dictionary<string, string>? dictionary = null;
-        JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
+        var imageDTO = await response.Content.ReadFromJsonAsync<ImageDTO>();
 
-        if (jsonString != null)
-        {
-            dictionary = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
-        }
-
-        return dictionary;
+        return imageDTO;
     }
 }

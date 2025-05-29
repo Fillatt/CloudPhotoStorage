@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using CloudPhotoStorage.UI.APIClient.Services;
+using CloudPhotoStorage.UI.Services;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -29,5 +30,8 @@ public class ServicesModule : Module
 
         builder
             .RegisterType<AuthenticationApiService>();
+
+        builder
+            .RegisterType<FilesService>();
     }
 }

@@ -13,14 +13,11 @@
 		</Grid.ColumnDefinitions>
 		<StackPanel Grid.Column="0"
 					Orientation="Vertical">
-			<ComboBox HorizontalAlignment="Stretch"/>
-			<ListBox ItemsSource="{Binding ImagesInfo}"
-					 SelectedItem="{Binding SelectedImageInfo.Name}">
-				<ListBox.ItemTemplate>
-					<DataTemplate>
-						<TextBlock Text="Имя изображения"/>
-					</DataTemplate>
-				</ListBox.ItemTemplate>
+			<ComboBox HorizontalAlignment="Stretch"
+					  ItemsSource="{Binding Categories}"
+					  SelectedItem="{Binding CurrentCategory}"/>
+			<ListBox ItemsSource="{Binding ImageNames}"
+					 SelectedItem="{Binding CurrentImageName}">
 			</ListBox>
 		</StackPanel>
 		<Grid Grid.Column="1"
@@ -31,20 +28,27 @@
 				<RowDefinition Height="50"/>
 			</Grid.RowDefinitions>
 			<TextBlock Grid.Row="0" 
-					   Text="Image Name"
+					   Text="{Binding CurrentImageName}"
 					   HorizontalAlignment="Center"
 					   VerticalAlignment="Center"
 					   Margin="0 0 0 10"/>
 			<Border Grid.Row="1" 
 					BorderThickness="1"
 					Background="LightGray">
-				<Image/>
+				<Image Source="{Binding Image}"/>
 			</Border>
+			
+			<TextBlock Grid.Row="1"
+					   HorizontalAlignment="Center"
+					   VerticalAlignment="Center"
+					   Text="Выберите фотографию"
+					   FontSize="20"
+					   IsVisible="{Binding IsPlaceholderVisible}"/>
+			
 			<StackPanel Grid.Row="2" Orientation="Horizontal"
 						Margin="0 10 0 0">
-				<Button Content="Отправить изображение"/>
-				<Button Content="Получить изображения"
-						Command="{Binding GetImagesCommand}"/>
+				<Button Content="Отправить изображение"
+						Command="{Binding Commands.SendImage}"/>
 			</StackPanel>
 		</Grid>
 	</Grid>
