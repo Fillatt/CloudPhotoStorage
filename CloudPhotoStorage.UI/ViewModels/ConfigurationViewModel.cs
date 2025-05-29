@@ -1,6 +1,15 @@
-﻿namespace CloudPhotoStorage.UI.ViewModels;
+﻿using ReactiveUI;
 
-public class ConfigurationViewModel : ViewModelBase
+namespace CloudPhotoStorage.UI.ViewModels;
+
+public class ConfigurationViewModel : ViewModelBase, IRoutableViewModel
 {
+    public string? UrlPathSegment => "ConfigurationViewModel";
 
+    public IScreen HostScreen { get; }
+
+    public ConfigurationViewModel(IScreen screen)
+    {
+        HostScreen = screen;
+    }
 }

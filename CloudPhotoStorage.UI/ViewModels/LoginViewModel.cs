@@ -7,7 +7,7 @@ using ReactiveUI;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
-public partial class LoginViewModel : ViewModelBase
+public partial class LoginViewModel : ViewModelBase, IRoutableViewModel
 {
     #region Fields 
     private AuthenticationApiService _authenticationApiService;
@@ -37,26 +37,30 @@ public partial class LoginViewModel : ViewModelBase
         get => _isEnabled;
         set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
     }
+
+    public string? UrlPathSegment => "LoginViewModel";
+
+    public IScreen HostScreen { get; }
     #endregion
 
     #region Events
-    public event EventHandler<EventArgs>? RegistrationSelected;
-
     public event EventHandler<EventArgs>? Logined;
     #endregion
 
     #region Constructors
-    public LoginViewModel(AuthenticationApiService authenticationApiService)
+    public LoginViewModel(AuthenticationApiService authenticationApiService, IScreen hostSreen)
     {
         _authenticationApiService = authenticationApiService;
+
+        HostScreen = hostSreen;
     }
     #endregion
 
     #region Public Methods
-    public void Register()
+    public IObservable<IRoutableViewModel> Register()
     {
-        RegistrationSelected?.Invoke(this, EventArgs.Empty);
-        ResetLoginAndPassword();
+        MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)HostScreen;
+        return mainWindowViewModel.RegistrationSelect();
     }
 
     public async Task LoginAsync()
@@ -67,8 +71,7 @@ public partial class LoginViewModel : ViewModelBase
             var account = new AccountDTO
             {
                 Login = Login,
-                Password = Password,
-                Role = "Пользователь"
+                Password = Password
             };
 
             await TryLoginAsync(account);

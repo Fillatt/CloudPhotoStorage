@@ -8,7 +8,7 @@ namespace CloudPhotoStorage.UI.APIClient.DTO;
 
 public class ImageInfoDTO
 {
-    string Name { get; set; }
+    public required string  Name { get; set; }
 
-    string CategoryName { get; set; }
+    public required string CategoryName { get; set; }
 }

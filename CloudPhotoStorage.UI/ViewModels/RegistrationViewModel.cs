@@ -3,32 +3,20 @@ using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.APIClient.Services;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Principal;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Tmds.DBus.Protocol;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
-public partial class RegistrationViewModel : ViewModelBase
+public partial class RegistrationViewModel : ViewModelBase, IRoutableViewModel
 {
     #region Fields
     private string _login;
 
     private string _password;
 
-    private string _role;
-
     private AuthenticationApiService _authenticationApiService;
 
     private bool _isEnabled = true;
-    #endregion
-
-    #region Events
-    public event EventHandler<EventArgs> LoginSelected;
     #endregion
 
     #region Public Fields
@@ -42,27 +30,24 @@ public partial class RegistrationViewModel : ViewModelBase
         get => _password;
         set => this.RaiseAndSetIfChanged(ref _password, value);
     }
-    public string Role 
-    {
-        get => _role;
-        set => this.RaiseAndSetIfChanged(ref _role, value);
-    }
-
-    public IEnumerable<string> AvailableRoles { get; } = ["Пользователь", "Администратор"];
 
     public bool IsEnabled
     {
         get => _isEnabled;
         set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
     }
+
+    public string? UrlPathSegment => "RegistrationViewModel";
+
+    public IScreen HostScreen { get; }
     #endregion
 
     #region Constructors
-    public RegistrationViewModel(AuthenticationApiService authenticationApiService)
+    public RegistrationViewModel(AuthenticationApiService authenticationApiService, IScreen screen)
     {
-        _authenticationApiService = authenticationApiService;
+        HostScreen = screen;
 
-        _role = AvailableRoles.First();
+        _authenticationApiService = authenticationApiService;
     }
     #endregion
 
@@ -75,8 +60,7 @@ public partial class RegistrationViewModel : ViewModelBase
             var account = new AccountDTO
             {
                 Login = Login,
-                Password = Password,
-                Role = Role
+                Password = Password
             };
 
             await TryRegisterAsync(account);
@@ -88,10 +72,10 @@ public partial class RegistrationViewModel : ViewModelBase
         IsEnabled = true;
     }
 
-    public void GoBack()
+    public IObservable<IRoutableViewModel> GoBack()
     {
-        LoginSelected.Invoke(this, new EventArgs());
-        ResetLoginAndPassword();
+        MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)HostScreen;
+        return mainWindowViewModel.LoginSelect();
     }
     #endregion
 

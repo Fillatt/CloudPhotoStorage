@@ -27,10 +27,14 @@ namespace CloudPhotoStorage.UI
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
+
+                MainWindowViewModel mainWindowViewModel = Container.Resolve<MainWindowViewModel>();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = Container.Resolve<MainWindowViewModel>(),
+                    DataContext = mainWindowViewModel,
                 };
+
+                mainWindowViewModel.LoginSelect();
             }
 
             base.OnFrameworkInitializationCompleted();

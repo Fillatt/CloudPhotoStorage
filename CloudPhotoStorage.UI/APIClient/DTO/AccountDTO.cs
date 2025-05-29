@@ -14,8 +14,5 @@ namespace CloudPhotoStorage.UI.APIClient.DTO
 
         [JsonPropertyName(nameof(Password))]
         public required string Password { get; set; }
-
-        [JsonPropertyName(nameof(Role))]
-        public required string Role { get; set; }
     }
 }
