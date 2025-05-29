@@ -16,6 +16,13 @@ namespace CloudPhotoStorage.DataBase.Repositories
             return await _dbContext.Categories
                 .FirstOrDefaultAsync(c => c.CategoryId == id, cancellationToken);
         }
+        public async Task<Guid?> GetIdByNameAsync(string name, CancellationToken cancellationToken)
+        {
+            return await _dbContext.Categories
+                .Where(c => c.CategoryName == name)
+                .Select(c => (Guid?)c.CategoryId)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
 
         public async Task<Category> GetByNameAsync(string name, CancellationToken cancellationToken)
         {
