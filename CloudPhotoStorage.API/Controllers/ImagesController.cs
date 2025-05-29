@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CloudPhotoStorage.API.Controllers
 {
- 
+
     [ApiController]
     public class ImagesController : ControllerBase
     {

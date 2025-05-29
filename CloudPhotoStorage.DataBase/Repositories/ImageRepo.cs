@@ -1,6 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using CloudPhotoStorage.DataBase.Models;
-using System.Threading;
+﻿using CloudPhotoStorage.DataBase.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CloudPhotoStorage.DataBase.Repositories
 {
