@@ -41,45 +41,45 @@ namespace CloudPhotoStorage.DataBase.Repositories
                 );
         }
 
-        public Task<List<Image>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        public Task<List<Image>> GetImagesByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             return _dbContext.Images
                 .Where(i => i.UserId == userId)
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<Image>> GetByCategoryIdAsync(Guid categoryId, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Image>> GetImagesByCategoryIdAsync(Guid categoryId, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
                 .Where(i => i.CategoryId == categoryId)
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<Image>> SearchByNameAsync(string searchTerm, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Image>> SearchImageByNameAsync(string searchTerm, CancellationToken cancellationToken)
         {
             return await _dbContext.Images
                 .Where(i => i.ImageName.Contains(searchTerm))
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<Image>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<Image>> GetAllImagesAsync(CancellationToken cancellationToken)
         {
             return await _dbContext.Images.ToListAsync(cancellationToken);
         }
 
-        public async Task AddAsync(Image image, CancellationToken cancellationToken)
+        public async Task AddImageImageAsync(Image image, CancellationToken cancellationToken)
         {
             await _dbContext.Images.AddAsync(image, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(Image image, CancellationToken cancellationToken)
+        public async Task UpdateImageAsync(Image image, CancellationToken cancellationToken)
         {
             _dbContext.Images.Update(image);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteAsync(Image image, CancellationToken cancellationToken)
+        public async Task DeleteImageAsync(Image image, CancellationToken cancellationToken)
         {
             _dbContext.Images.Remove(image);
             await _dbContext.SaveChangesAsync(cancellationToken);

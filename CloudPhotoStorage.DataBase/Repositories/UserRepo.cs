@@ -17,7 +17,7 @@ namespace CloudPhotoStorage.DataBase.Repositories
             return _dbContext.Users
                 .FirstOrDefaultAsync(u => u.UserId == id, cancellationToken);
         }
-        public Task<Guid?> GetIdByLoginAsync(string login, CancellationToken cancellationToken)
+        public Task<Guid?> GetUserIdByLoginAsync(string login, CancellationToken cancellationToken)
         {
             return _dbContext.Users
                 .Where(u => u.Login == login)
@@ -31,25 +31,25 @@ namespace CloudPhotoStorage.DataBase.Repositories
                 .FirstOrDefaultAsync(u => u.Login == login, cancellationToken);
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken)
         {
             return await _dbContext.Users
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task AddAsync(User user, CancellationToken cancellationToken)
+        public async Task AddUserAsync(User user, CancellationToken cancellationToken)
         {
             await _dbContext.Users.AddAsync(user, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(User user, CancellationToken cancellationToken)
+        public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
         {
             _dbContext.Users.Update(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteAsync(User user, CancellationToken cancellationToken)
+        public async Task DeleteUserAsync(User user, CancellationToken cancellationToken)
         {
             _dbContext.Users.Remove(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
