@@ -1,13 +1,8 @@
 ﻿using CloudPhotoStorage.API.DTOs;
+using CloudPhotoStorage.API.Services;
 using CloudPhotoStorage.DataBase.Models;
 using CloudPhotoStorage.DataBase.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using CloudPhotoStorage.API.Services;
-using System.Text;
-using System.Text.Json.Serialization.Metadata;
-using System.Xml.Linq;
-using System.IO;
-using System;
 
 namespace CloudPhotoStorage.API.Controllers
 {
@@ -181,7 +176,7 @@ namespace CloudPhotoStorage.API.Controllers
                 if (user != null && category != null)
                 {
                     // Проверка пароля
-                    var passwordHash = user.PasswordHash;   
+                    var passwordHash = user.PasswordHash;
                     var passwordSalt = user.PasswordSalt;
 
                     if (!PasswordHasher.VerifyPasswordHash(userDto.Password, passwordHash, passwordSalt))
@@ -229,41 +224,44 @@ namespace CloudPhotoStorage.API.Controllers
         /// <summary>
         /// Удалить изображение
         /// </summary>
-        //[Route("api/images/delete/{id}")]
-        //public async task<iactionresult> deleteimage(guid id, [fromquery] guid userid, cancellationtoken cancellationtoken)
-        //{
-        //    try
-        //    {
-        //        var image = await _imagerepo.getimagebyidasync(id, cancellationtoken);
-        //        if (image == null)
-        //        {
-        //            return notfound("изображение не найдено");
-        //        }
+        [HttpPost]
+        [Route("api/images/delete")]
+        public async Task<ActionResult> DeleteImage(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var getImageDto = await HttpContext.Request.ReadFromJsonAsync<GetImageDTO>();
+                var user = await _userRepo.GetUserByLoginAsync(getImageDto.Login, cancellationToken);
 
-        //        var user = await _userrepo.getuserbyidasync(userid, cancellationtoken);
-        //        if (user == null)
-        //        {
-        //            return notfound("пользователь не найден");
-        //        }
+                if (user != null)
+                {
+                    // Проверка пароля
+                    var passwordHash = user.PasswordHash;
+                    var passwordSalt = user.PasswordSalt;
 
-        //        await _wastebasketrepo.addasync(new wastebasket
-        //        {
-        //            wastebasketid = guid.newguid(),
-        //            imageid = image.imageid,
-        //            userid = userid,
-        //            deletedate = datetime.utcnow
-        //        }, cancellationtoken);
+                    if (!PasswordHasher.VerifyPasswordHash(getImageDto.Password, passwordHash, passwordSalt))
+                    {
+                        return Unauthorized("Неверный пароль");
+                    }
 
-        //        await _imagerepo.deleteasync(image, cancellationtoken);
+                    var image = await _imageRepo.GetImageByNameAsync(getImageDto.ImageName, cancellationToken);
 
-        //        return nocontent();
-        //    }
-        //    catch (exception ex)
-        //    {
-        //        _logger.logerror(ex, $"ошибка при удалении изображения с id {id}");
-        //        return statuscode(500, "внутренняя ошибка сервера");
-        //    }
-        //}
+                    if (image == null)
+                    {
+                        return NotFound("Изображение не найдено");
+                    }
+
+                    await _imageRepo.DeleteAsync(image, cancellationToken);
+                    return Ok();
+                }
+                else return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при удалении изображения");
+                return StatusCode(500, "Внутренняя ошибка сервера");
+            }
+        }
 
         /// <summary>
         /// Получить имена изображений с категориями указанного пользователя
