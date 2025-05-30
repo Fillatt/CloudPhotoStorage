@@ -1,4 +1,5 @@
-﻿using CloudPhotoStorage.UI.APIClient.DTO;
+﻿using Avalonia.Controls.ApplicationLifetimes;
+using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.Services;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -44,22 +45,46 @@ public class ImageApiService
         multipartFormContent.Add(imageContent, "ImageData", "ImageData");
 
         var response = await _httpClient.PostAsync($"{_configuration.GetApiUrl()}api/images/post", multipartFormContent);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await ShowMessageAsync("Ошибка", "Ошибка подключения");
+            throw new Exception();
+        }
     }
 
     public async Task<List<ImageInfoDTO>?> GetImagesInfoAsync(AccountDTO accountDTO)
     {
         var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_configuration.GetApiUrl()}api/images/get/names-with-categories", accountDTO);
-        List<ImageInfoDTO>? list = await response.Content.ReadFromJsonAsync<List<ImageInfoDTO>>();
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await ShowMessageAsync("Ошибка", "Ошибка подключения");
+            throw new Exception();
+        }
 
+        List<ImageInfoDTO>? list = await response.Content.ReadFromJsonAsync<List<ImageInfoDTO>>();
         return list;
     }
 
     public async Task<ImageDTO?> GetImageAsync(GetImageDTO getImageDTO)
     {
         var response = await _httpClient.PostAsJsonAsync<GetImageDTO>($"{_configuration.GetApiUrl()}api/image/get", getImageDTO);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await ShowMessageAsync("Ошибка", "Ошибка подключения");
+            throw new Exception();
+        }
 
         var imageDTO = await response.Content.ReadFromJsonAsync<ImageDTO>();
 
         return imageDTO;
+    }
+
+    private async Task ShowMessageAsync(string caption, string message)
+    {
+        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
+            if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
+        }
     }
 }

@@ -105,16 +105,20 @@ public partial class LoginViewModel : ViewModelBase, IRoutableViewModel
     {
         try
         {
-            var IsSuccess = await _authenticationApiService.LoginAsync(account);
-            if (IsSuccess)
+            var statusCode = await _authenticationApiService.LoginAsync(account);
+            if (statusCode == System.Net.HttpStatusCode.OK)
             {
                 await ShowMessageAsync("Внимание", $"Вход в аккаунт \"{Login}\" прошел успешно.");
                 Logined?.Invoke(this, new EventArgs());
                 ResetLoginAndPassword();
             }
+            else if (statusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                await ShowMessageAsync("Ошибка", "Ошибка подключения.");
+            }
             else
             {
-                await ShowMessageAsync("Ошибка", "Неверно указано имя пользователя или пароль");
+                await ShowMessageAsync("Ошибка", "Неверно указано имя пользователя или пароль.");
             }
         }
         catch

@@ -97,21 +97,23 @@ public partial class RegistrationViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task TryRegisterAsync(AccountDTO account)
     {
-        try
+        var statusCode = await _authenticationApiService.RegistrationAsync(account);
+        if (statusCode == System.Net.HttpStatusCode.OK)
         {
-            if (!await _authenticationApiService.RegistrationAsync(account))
-            {
-                string message = $"Пользователь с именем \"{Login}\" существует.";
-                await ShowMessageAsync("Ошибка", message);
-            }
-            else
-            {
-                string message = $"Пользователь с именем \"{Login}\" успешно зарегистрирован.";
-                await ShowMessageAsync("Внимание", message);
-                ResetLoginAndPassword();
-            }
+            string message = $"Пользователь с именем \"{Login}\" успешно зарегистрирован.";
+            await ShowMessageAsync("Внимание", message);
+            ResetLoginAndPassword();
         }
-        catch { await ShowMessageAsync("Ошибка", "Отсуствует соединение с сервисом."); }
+        else if (statusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            string message = "Ошибка подключения.";
+            await ShowMessageAsync("Ошибка", message);
+        }
+        else
+        {
+            string message = $"Пользователь с именем \"{Login}\" существует.";
+            await ShowMessageAsync("Ошибка", message);
+        }
     }
 
     private void ResetLoginAndPassword()
