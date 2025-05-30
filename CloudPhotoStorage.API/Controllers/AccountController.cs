@@ -80,7 +80,7 @@ namespace CloudPhotoStorage.API.Controllers
             {
                 var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
 
-                var user = await _userRepo.GetUserByLoginAsync(userDto.Login, new CancellationToken());
+                var user = await _userRepo.GetUserByLogin(userDto.Login, new CancellationToken());
                 if (user != null)
                 {
                     // Проверка пароля

@@ -11,72 +11,88 @@ namespace CloudPhotoStorage.DataBase.Repositories
         {
             _dbContext = dbContext;
         }
-        public Task<Category?> GetCategoryByIdAsync(Guid? id, CancellationToken cancellationToken)
+        public Task<Category?> GetCategoryById(Guid? id, CancellationToken cancellationToken)
         {
             return _dbContext.Categories
                 .FirstOrDefaultAsync(c => c.CategoryId == id, cancellationToken);
         }
-        public Task<Guid?> GetCategoryIdByNameAsync(string name, CancellationToken cancellationToken)
+        public async Task<Guid> GetCategoryIdByName(string name, CancellationToken cancellationToken)
         {
-            return _dbContext.Categories
+            var categoryId = await _dbContext.Categories
                 .Where(c => c.CategoryName == name)
-                .Select(c => (Guid?)c.CategoryId)
+                .Select(c => c.CategoryId)
                 .FirstOrDefaultAsync(cancellationToken);
-        }
 
-        public async Task<Category> GetByNameAsync(string name, CancellationToken cancellationToken)
+            if (categoryId != Guid.Empty)
+            {
+                return categoryId;
+            }
+
+            var newCategory = new Category
+            {
+                CategoryId = Guid.NewGuid(),
+                CategoryName = name
+            };
+
+            await _dbContext.Categories.AddAsync(newCategory, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return newCategory.CategoryId;
+        }
+        
+        public Task<Category> GetCategoryByName(string name, CancellationToken cancellationToken)
         {
-            return await _dbContext.Categories
+            return  _dbContext.Categories
                 .FirstOrDefaultAsync(c => c.CategoryName == name, cancellationToken);
         }
 
-        public async Task<IEnumerable<Category>> GetAllAsync(CancellationToken cancellationToken)
+        public Task<List<Category>> GetAllCategories(CancellationToken cancellationToken)
         {
-            return await _dbContext.Categories.ToListAsync(cancellationToken);
+            return _dbContext.Categories.ToListAsync(cancellationToken);
         }
 
-        public async Task AddAsync(Category category, CancellationToken cancellationToken)
+        public async Task AddCategoryAsync(Category category, CancellationToken cancellationToken)
         {
             await _dbContext.Categories.AddAsync(category, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(Category category, CancellationToken cancellationToken)
+        public Task UpdateCategoryAsync(Category category, CancellationToken cancellationToken)
         {
             _dbContext.Categories.Update(category);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            return _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteAsync(Category category, CancellationToken cancellationToken)
+        public Task DeleteCategoryAsync(Category category, CancellationToken cancellationToken)
         {
             _dbContext.Categories.Remove(category);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            return _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task DeleteCategoryByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var category = await GetCategoryByIdAsync(id, cancellationToken);
+            var category = await GetCategoryById(id, cancellationToken);
             if (category != null)
             {
-                await DeleteAsync(category, cancellationToken);
+                await DeleteCategoryAsync(category, cancellationToken);
             }
         }
 
-        public async Task<bool> ExistscAsync(Guid id, CancellationToken cancellationToken)
+        public Task<bool> CategoryExistsById(Guid id, CancellationToken cancellationToken)
         {
-            return await _dbContext.Categories
+            return _dbContext.Categories
                 .AnyAsync(c => c.CategoryId == id, cancellationToken);
         }
 
-        public async Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken)
+        public Task<bool> CategoryExistsByName(string name, CancellationToken cancellationToken)
         {
-            return await _dbContext.Categories
+            return _dbContext.Categories
                 .AnyAsync(c => c.CategoryName == name, cancellationToken);
         }
 
-        public async Task<int> GetImageCountAsync(Guid categoryId, CancellationToken cancellationToken)
+        public Task<int> GetImageCount(Guid categoryId, CancellationToken cancellationToken)
         {
-            return await _dbContext.Images
+            return _dbContext.Images
                 .Where(i => i.CategoryId == categoryId)
                 .CountAsync(cancellationToken);
         }

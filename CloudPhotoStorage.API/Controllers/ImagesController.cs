@@ -48,7 +48,7 @@ namespace CloudPhotoStorage.API.Controllers
             try
             {
                 var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
-                var user = await _userRepo.GetUserByLoginAsync(userDto.Login, cancellationToken);
+                var user = await _userRepo.GetUserByLogin(userDto.Login, cancellationToken);
 
                 if (user == null)
                 {
@@ -64,7 +64,7 @@ namespace CloudPhotoStorage.API.Controllers
                     return Unauthorized("Неверный пароль");
                 }
 
-                var images = await _imageRepo.GetByUserIdAsync(user.UserId, cancellationToken);
+                var images = await _imageRepo.GetImagesByUserId(user.UserId, cancellationToken);
 
                 if (images == null || !images.Any())
                 {
@@ -74,7 +74,7 @@ namespace CloudPhotoStorage.API.Controllers
                 var result = new List<ImageDTO>();
                 foreach (var image in images)
                 {
-                    var category = await _categoryRepo.GetCategoryByIdAsync(image.CategoryId, cancellationToken);
+                    var category = await _categoryRepo.GetCategoryById(image.CategoryId, cancellationToken);
 
                     result.Add(new ImageDTO
                     {
@@ -103,7 +103,7 @@ namespace CloudPhotoStorage.API.Controllers
             try
             {
                 var getImageDTO = await HttpContext.Request.ReadFromJsonAsync<GetImageDTO>();
-                var user = await _userRepo.GetUserByLoginAsync(getImageDTO.Login, cancellationToken);
+                var user = await _userRepo.GetUserByLogin(getImageDTO.Login, cancellationToken);
 
                 if (user == null)
                 {
@@ -119,8 +119,8 @@ namespace CloudPhotoStorage.API.Controllers
                     return Unauthorized("Неверный пароль");
                 }
 
-                var image = await _imageRepo.GetImageByNameAsync(getImageDTO.ImageName, new CancellationToken());
-                var category = await _categoryRepo.GetCategoryByIdAsync(image.CategoryId, new CancellationToken());
+                var image = await _imageRepo.GetImageByName(getImageDTO.ImageName, new CancellationToken());
+                var category = await _categoryRepo.GetCategoryById(image.CategoryId, new CancellationToken());
 
                 ImageDTO imageDTO = new ImageDTO
                 {
@@ -172,11 +172,11 @@ namespace CloudPhotoStorage.API.Controllers
                     return BadRequest("Изображение обязательно");
                 }
 
-                var userId = await _userRepo.GetIdByLoginAsync(userDto.Login, cancellationToken);
-                var categoryId = await _categoryRepo.GetCategoryIdByNameAsync(imageDto.CategoryName, cancellationToken);
+                var userId = await _userRepo.GetUserIdByLogin(userDto.Login, cancellationToken);
+                var categoryId = await _categoryRepo.GetCategoryIdByName(imageDto.CategoryName, cancellationToken);
 
-                var user = await _userRepo.GetUserByIdAsync(userId, cancellationToken);
-                var category = await _categoryRepo.GetCategoryByIdAsync(categoryId, cancellationToken);
+                var user = await _userRepo.GetUserById(userId, cancellationToken);
+                var category = await _categoryRepo.GetCategoryById(categoryId, cancellationToken);
 
                 if (user != null && category != null)
                 {
@@ -199,9 +199,9 @@ namespace CloudPhotoStorage.API.Controllers
                         CategoryId = (Guid)categoryId
                     };
 
-                    await _imageRepo.AddAsync(image, cancellationToken);
+                    await _imageRepo.AddImage(image, cancellationToken);
 
-                    await _loginHistoryRepo.AddAsync(new LoginHistory
+                    await _loginHistoryRepo.AddLoginHistoryAsync(new LoginHistory
                     {
                         LoginId = Guid.NewGuid(),
                         UserId = (Guid)userId,
@@ -268,8 +268,8 @@ namespace CloudPhotoStorage.API.Controllers
             try
             {
                 var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>(); 
-                Guid userId = (Guid)await _userRepo.GetIdByLoginAsync(userDto.Login, cancellationToken);
-                var user = await _userRepo.GetUserByIdAsync(userId, cancellationToken);
+                Guid userId = (Guid)await _userRepo.GetUserIdByLogin(userDto.Login, cancellationToken);
+                var user = await _userRepo.GetUserById(userId, cancellationToken);
                 if (user == null)
                 {
                     return NotFound("Пользователь не найден");

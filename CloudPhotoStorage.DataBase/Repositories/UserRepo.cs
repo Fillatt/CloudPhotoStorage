@@ -12,12 +12,12 @@ namespace CloudPhotoStorage.DataBase.Repositories
             _dbContext = dbContext;
         }
 
-        public Task<User?> GetUserByIdAsync(Guid? id, CancellationToken cancellationToken)
+        public Task<User?> GetUserById(Guid? id, CancellationToken cancellationToken)
         {
             return _dbContext.Users
                 .FirstOrDefaultAsync(u => u.UserId == id, cancellationToken);
         }
-        public Task<Guid?> GetIdByLoginAsync(string login, CancellationToken cancellationToken)
+        public Task<Guid?> GetUserIdByLogin(string login, CancellationToken cancellationToken)
         {
             return _dbContext.Users
                 .Where(u => u.Login == login)
@@ -25,39 +25,39 @@ namespace CloudPhotoStorage.DataBase.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public Task<User?> GetUserByLoginAsync(string login, CancellationToken cancellationToken)
+        public Task<User?> GetUserByLogin(string login, CancellationToken cancellationToken)
         {
             return _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Login == login, cancellationToken);
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync(CancellationToken cancellationToken)
+        public Task<List<User>> GetAllUsers(CancellationToken cancellationToken)
         {
-            return await _dbContext.Users
+            return _dbContext.Users
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task AddAsync(User user, CancellationToken cancellationToken)
+        public async Task AddUserAsync(User user, CancellationToken cancellationToken)
         {
             await _dbContext.Users.AddAsync(user, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(User user, CancellationToken cancellationToken)
+        public Task UpdateUser(User user, CancellationToken cancellationToken)
         {
             _dbContext.Users.Update(user);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            return _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteAsync(User user, CancellationToken cancellationToken)
+        public Task DeleteUser(User user, CancellationToken cancellationToken)
         {
             _dbContext.Users.Remove(user);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            return _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<bool> HasLoginAsync(string login, CancellationToken cancellationToken)
+        public Task<bool> UserLoginExists(string login, CancellationToken cancellationToken)
         {
-            return await _dbContext.Users
+            return _dbContext.Users
                 .AnyAsync(u => u.Login == login, cancellationToken);
         }
     }
