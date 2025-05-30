@@ -263,7 +263,7 @@ namespace CloudPhotoStorage.API.Controllers
         /// </summary>
         [HttpPost]
         [Route("api/images/get/names-with-categories")]
-        public async Task<ActionResult<List<ImageWithCategoryDto>>> GetImageNamesWithCategories(CancellationToken cancellationToken)
+        public async Task<ActionResult<List<ImageWithCategoryAndUploadDateDto>>> GetImageNamesWithCategoriesAndDate(CancellationToken cancellationToken)
         {
             try
             {
@@ -283,16 +283,17 @@ namespace CloudPhotoStorage.API.Controllers
                     return Unauthorized("Неверный пароль");
                 }
 
-                var imagesDict = await _imageRepo.GetUserImagesWithCategoriesAsync(user.Login, cancellationToken);
+                var imagesList = await _imageRepo.GetByUserIdAsync(user.UserId, cancellationToken);
 
-                var result = imagesDict
-                    .Select(x => new ImageWithCategoryDto
-                    {
-                        ImageName = x.Key,
-                        Category = x.Value
-                    })
-                    .ToList();
+                var imageDtos = await Task.WhenAll(imagesList.Select(async x =>
+                new ImageWithCategoryAndUploadDateDto
+                {
+                    ImageName = x.ImageName,
+                    Category = await _categoryRepo.GetCategoryNameByIdAsync(x.CategoryId, cancellationToken),
+                    UploadDate = x.UploadDate
+                }));
 
+                var result = imageDtos.ToList();
                 return Ok(result);
             }
             catch (Exception ex)
