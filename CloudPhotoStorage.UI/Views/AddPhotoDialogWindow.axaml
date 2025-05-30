@@ -1,0 +1,107 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:CloudPhotoStorage.UI.ViewModels"
+        x:Class="CloudPhotoStorage.UI.Views.AddPhotoDialogWindow"
+		x:DataType="vm:AddPhotoDialogViewModel"
+		
+		Width="800"
+		Height="450"
+		
+		WindowStartupLocation="CenterScreen"
+		
+		ExtendClientAreaToDecorationsHint="True"
+		ExtendClientAreaChromeHints="NoChrome"
+		ExtendClientAreaTitleBarHeightHint="-1"
+		SystemDecorations="BorderOnly">
+	<Grid Margin="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="50"/>
+			<RowDefinition Height="50"/>
+			<RowDefinition Height="50"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="50"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="230"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="150"/>
+			<ColumnDefinition Width="150"/>
+		</Grid.ColumnDefinitions>
+		
+		<TextBlock Grid.Row="0"
+				   Grid.Column="0"
+				   Text="Расположение изображения:"
+				   VerticalAlignment="Center"
+				   HorizontalAlignment="Right"
+				   Margin="0 0 10 0"/>
+		<TextBox Grid.Row="0"
+				 Grid.Column="1"
+				 Grid.ColumnSpan="2"
+				 Height="30"
+				 IsReadOnly="True"
+				 Text="{Binding ImagePath}"/>
+		<Button Grid.Row="0"
+				Grid.Column="3"
+				Height="30"
+				VerticalAlignment="Center"
+				HorizontalAlignment="Stretch"
+				HorizontalContentAlignment="Center"
+				Margin="10 0 0 0"
+				Content="Выбрать файл"
+				Command="{Binding Commands.OpenFile}"/>
+		
+		<TextBlock Grid.Row="1"
+				   Grid.Column="0"
+				   Text="Категория:"
+				   VerticalAlignment="Center"
+				   HorizontalAlignment="Right"
+				   Margin="0 0 10 0"/>
+		<TextBox Grid.Row="1"
+				 Grid.Column="1"
+				 Grid.ColumnSpan="2"
+				 Height="30"
+				 Text="{Binding ImageCategory}"/>
+
+		<TextBlock Grid.Row="2"
+				   Grid.Column="0"
+				   Text="Существующие категории:"
+				   VerticalAlignment="Center"
+				   HorizontalAlignment="Right"
+				   Margin="0 0 10 0"/>
+		<Border Grid.Row="2"
+				Grid.RowSpan="2"
+				Grid.Column="1"
+				Grid.ColumnSpan="2">
+			<ScrollViewer>
+				<ListBox Tapped="ListBox_Tapped"
+						 ItemsSource="{Binding Categories}"
+						 SelectedItem="{Binding CurrentCategory}"/>
+			</ScrollViewer>
+		</Border>
+		
+		<Button Grid.Row="4"
+				Grid.Column="3"
+				Height="50"
+				VerticalAlignment="Bottom"
+				VerticalContentAlignment="Center"
+				HorizontalAlignment="Stretch"
+				HorizontalContentAlignment="Center"
+				Margin="10 10 0 0"
+				Content="Принять"
+				Command="{Binding Commands.Save}"
+				IsEnabled="{Binding CanSave}"/>
+		<Button Grid.Row="4"
+				Grid.Column="2"
+				Height="50"
+				VerticalAlignment="Bottom"
+				VerticalContentAlignment="Center"
+				HorizontalAlignment="Stretch"
+				HorizontalContentAlignment="Center"
+				Margin="10 10 0 0"
+				Content="Отмена"
+				Command="{Binding Commands.Cancel}"/>
+		
+	</Grid>
+</Window>

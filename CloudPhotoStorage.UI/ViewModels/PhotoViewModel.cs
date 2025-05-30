@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media.Imaging;
 using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.APIClient.Services;
 using CloudPhotoStorage.UI.Services;
@@ -23,15 +24,13 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
 
     private string? _currentCategory;
 
-    private List<string> _imageNames;
-
     private string _currentImageName;
 
     private List<string> _filteredImageNames;
 
     private List<ImageInfoDTO>? _imagesInfo;
 
-    private Bitmap _image;
+    private Bitmap? _image;
 
     private bool _isPlaceholderVisible = true;
 
@@ -95,12 +94,6 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         }
     }
 
-    public List<string> ImageNames
-    {
-        get => _imageNames;
-        set => this.RaiseAndSetIfChanged(ref _imageNames, value);
-    }
-
     public string CurrentImageName
     {
         get => _currentImageName;
@@ -112,17 +105,22 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
                 _ = GetImageAsync(value);
                 CanDelete = true;
             }
-            else CanDelete = false;
+            else
+            {
+                CanDelete = false;
+                Image = null;
+                IsPlaceholderVisible = true;
+            }
         }
     }
 
     public List<string> FilteredImageNames
     {
-        get => _imageNames;
+        get => _filteredImageNames;
         set => this.RaiseAndSetIfChanged(ref _filteredImageNames, value);
     }
 
-    public Bitmap Image
+    public Bitmap? Image
     {
         get => _image;
         set
@@ -167,31 +165,25 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
     {
         try
         {
-            var file = await _filesService.OpenImageFileAsync();
-            if (file != null)
+            AddPhotoDialogViewModel addPhotoDialog = new(_categories, _filesService);
+            await addPhotoDialog.ShowDialogAsync();
+            if (addPhotoDialog.IsOK)
             {
-                string name = file.Name;
-
-                var memoryStream = new MemoryStream();
-                Stream stream = await file.OpenReadAsync();
-                stream.CopyTo(memoryStream);
-
-                byte[] imageData = memoryStream.ToArray();
-
                 if (HostScreen is MainWindowViewModel mainWindowViewModel)
                 {
+                    ImageDTO imageDto = await addPhotoDialog.GetImageDTOAsync();
                     SendImageDTO sendImageDTO = new SendImageDTO
                     {
-                        Name = name,
-                        ImageData = imageData,
-                        UploadDate = System.DateTime.UtcNow,
-                        CategoryName = "ВУЦ",
+                        Name = imageDto.Name,
+                        ImageData = imageDto.ImageData,
+                        CategoryName = imageDto.CategoryName,
+                        UploadDate = imageDto.UploadDate,
                         Login = mainWindowViewModel.UserName,
                         Password = mainWindowViewModel.Password
                     };
 
                     await _imageApiService.SendImageAsync(sendImageDTO);
-
+                    await ShowMessageAsync("Внимание", "Изображение добавлено.");
                     await GetImagesInfoAsync();
                 }
             }
@@ -214,7 +206,7 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
                     Password = mainWindowViewModel.Password
                 };
                 _imagesInfo = await _imageApiService.GetImagesInfoAsync(account);
-                if (_imagesInfo != null) InitCategoriesAndImageNames(_imagesInfo);
+                if (_imagesInfo != null) InitCategories(_imagesInfo);
             }
         }
         catch
@@ -225,7 +217,7 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
     #endregion
 
     #region Private Methods
-    private void InitCategoriesAndImageNames(List<ImageInfoDTO> imageInfoDTOs)
+    private void InitCategories(List<ImageInfoDTO> imageInfoDTOs)
     {
         List<string> categories = [];
         List<string> imageNames = [];
@@ -233,12 +225,10 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         foreach(var imageDTO in  imageInfoDTOs)
         {
             if(!categories.Any(x => x == imageDTO.Category)) categories.Add(imageDTO.Category);
-            imageNames.Add(imageDTO.ImageName);
         }
 
         Categories = categories;
         CurrentCategory = Categories.FirstOrDefault();
-        ImageNames = imageNames;
     }
 
     private void FilterImageNames(string? category)
@@ -283,6 +273,15 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
     {
         IsConnected = false;
         PlaceHolder = "Отсутсвует соединение с сервером";
+    }
+
+    private async Task ShowMessageAsync(string caption, string message)
+    {
+        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
+            if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
+        }
     }
     #endregion
 }

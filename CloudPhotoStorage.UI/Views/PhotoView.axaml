@@ -41,7 +41,7 @@
 					  ItemsSource="{Binding Categories}"
 					  SelectedItem="{Binding CurrentCategory}"
 					  IsEnabled="{Binding IsEnabled}"/>
-			<ListBox ItemsSource="{Binding ImageNames}"
+			<ListBox ItemsSource="{Binding FilteredImageNames}"
 					 SelectedItem="{Binding CurrentImageName}">
 			</ListBox>
 		</StackPanel>
