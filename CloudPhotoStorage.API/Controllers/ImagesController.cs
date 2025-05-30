@@ -181,12 +181,19 @@ namespace CloudPhotoStorage.API.Controllers
                 if (user != null && category != null)
                 {
                     // Проверка пароля
-                    var passwordHash = user.PasswordHash;
+                    var passwordHash = user.PasswordHash;   
                     var passwordSalt = user.PasswordSalt;
 
                     if (!PasswordHasher.VerifyPasswordHash(userDto.Password, passwordHash, passwordSalt))
                     {
                         return Unauthorized("Неверный пароль");
+                    }
+
+                    // Проверка уникальности имени изображения
+                    var imagesList = await _imageRepo.GetByUserIdAsync(user.UserId, cancellationToken);
+                    if (imagesList.Any(i => i.ImageName == imageDto.Name))
+                    {
+                        return BadRequest("Изображение с таким именем уже существует");
                     }
 
                     var image = new Image
@@ -223,39 +230,39 @@ namespace CloudPhotoStorage.API.Controllers
         /// Удалить изображение
         /// </summary>
         //[Route("api/images/delete/{id}")]
-        //public async Task<IActionResult> DeleteImage(Guid id, [FromQuery] Guid userId, CancellationToken cancellationToken)
+        //public async task<iactionresult> deleteimage(guid id, [fromquery] guid userid, cancellationtoken cancellationtoken)
         //{
-            //try
-            //{
-            //    var image = await _imageRepo.GetImageByIdAsync(id, cancellationToken);
-            //    if (image == null)
-            //    {
-            //        return NotFound("Изображение не найдено");
-            //    }
+        //    try
+        //    {
+        //        var image = await _imagerepo.getimagebyidasync(id, cancellationtoken);
+        //        if (image == null)
+        //        {
+        //            return notfound("изображение не найдено");
+        //        }
 
-            //    var user = await _userRepo.GetUserByIdAsync(userId, cancellationToken);
-            //    if (user == null)
-            //    {
-            //        return NotFound("Пользователь не найден");
-            //    }
+        //        var user = await _userrepo.getuserbyidasync(userid, cancellationtoken);
+        //        if (user == null)
+        //        {
+        //            return notfound("пользователь не найден");
+        //        }
 
-            //    await _wasteBasketRepo.AddAsync(new WasteBasket
-            //    {
-            //        WasteBasketId = Guid.NewGuid(),
-            //        ImageId = image.ImageId,
-            //        UserId = userId,
-            //        DeleteDate = DateTime.UtcNow
-            //    }, cancellationToken);
+        //        await _wastebasketrepo.addasync(new wastebasket
+        //        {
+        //            wastebasketid = guid.newguid(),
+        //            imageid = image.imageid,
+        //            userid = userid,
+        //            deletedate = datetime.utcnow
+        //        }, cancellationtoken);
 
-            //    await _imageRepo.DeleteAsync(image, cancellationToken);
+        //        await _imagerepo.deleteasync(image, cancellationtoken);
 
-            //    return NoContent();
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex, $"Ошибка при удалении изображения с ID {id}");
-            //    return StatusCode(500, "Внутренняя ошибка сервера");
-            //}
+        //        return nocontent();
+        //    }
+        //    catch (exception ex)
+        //    {
+        //        _logger.logerror(ex, $"ошибка при удалении изображения с id {id}");
+        //        return statuscode(500, "внутренняя ошибка сервера");
+        //    }
         //}
 
         /// <summary>
