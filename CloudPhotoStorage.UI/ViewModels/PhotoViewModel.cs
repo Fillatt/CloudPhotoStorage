@@ -1,5 +1,4 @@
-﻿using Avalonia.Collections;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.APIClient.Services;
 using CloudPhotoStorage.UI.Services;
@@ -7,13 +6,13 @@ using ReactiveUI;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
 public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
 {
+    #region Fields
     private ImageApiService _imageApiService;
 
     private ImageInfoDTO _selectedImageInfo;
@@ -36,6 +35,17 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
 
     private bool _isPlaceholderVisible = true;
 
+    private bool _isEnabled;
+
+    private bool _isConnected = true;
+
+    private bool _canDelete;
+
+    private string _placeHolder = "Выберите фотографию";
+    #endregion
+
+    #region Properties
+
     public List<ImageInfoDTO>? ImagesInfo
     {
         get => _imagesInfo;
@@ -55,7 +65,24 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
     public List<string> Categories
     {
         get => _categories;
-        set => this.RaiseAndSetIfChanged(ref _categories, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _categories, value);
+            if(_categories.Any()) IsEnabled = true;
+            else IsEnabled = false;
+        }
+    }
+
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
+    }
+
+    public bool IsConnected
+    {
+        get => _isConnected;
+        set => this.RaiseAndSetIfChanged(ref _isConnected, value);
     }
 
     public string? CurrentCategory
@@ -80,10 +107,12 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         set
         {
             this.RaiseAndSetIfChanged(ref _currentImageName, value);
-            if(value != null)
+            if (value != null)
             {
                 _ = GetImageAsync(value);
+                CanDelete = true;
             }
+            else CanDelete = false;
         }
     }
 
@@ -109,6 +138,20 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _isPlaceholderVisible, value);
     }
 
+    public bool CanDelete
+    {
+        get => _canDelete;
+        set => this.RaiseAndSetIfChanged(ref _canDelete, value);
+    }
+
+    public string PlaceHolder
+    {
+        get => _placeHolder;
+        set => this.RaiseAndSetIfChanged(ref _placeHolder, value);
+    }
+    #endregion
+
+    #region Constructors
     public PhotoViewModel(ImageApiService imageApiService, IScreen screen, FilesService filesService)
     {
         _imageApiService = imageApiService;
@@ -117,53 +160,71 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
 
         _ = GetImagesInfoAsync();
     }
+    #endregion
 
+    #region Public Methods
     public async Task SendImageAsync()
     {
-        var file = await _filesService.OpenImageFileAsync();
-        if (file != null)
+        try
         {
-            string name = file.Name;
-
-            var memoryStream = new MemoryStream();
-            Stream stream = await file.OpenReadAsync();
-            stream.CopyTo(memoryStream);
-
-            byte[] imageData = memoryStream.ToArray();
-
-            if (HostScreen is MainWindowViewModel mainWindowViewModel)
+            var file = await _filesService.OpenImageFileAsync();
+            if (file != null)
             {
-                SendImageDTO sendImageDTO = new SendImageDTO
+                string name = file.Name;
+
+                var memoryStream = new MemoryStream();
+                Stream stream = await file.OpenReadAsync();
+                stream.CopyTo(memoryStream);
+
+                byte[] imageData = memoryStream.ToArray();
+
+                if (HostScreen is MainWindowViewModel mainWindowViewModel)
                 {
-                    Name = name,
-                    ImageData = imageData,
-                    UploadDate = System.DateTime.UtcNow,
-                    CategoryName = "ВУЦ",
-                    Login = mainWindowViewModel.UserName,
-                    Password = mainWindowViewModel.Password
-                };
+                    SendImageDTO sendImageDTO = new SendImageDTO
+                    {
+                        Name = name,
+                        ImageData = imageData,
+                        UploadDate = System.DateTime.UtcNow,
+                        CategoryName = "ВУЦ",
+                        Login = mainWindowViewModel.UserName,
+                        Password = mainWindowViewModel.Password
+                    };
 
-                await _imageApiService.SendImageAsync(sendImageDTO);
+                    await _imageApiService.SendImageAsync(sendImageDTO);
 
-                await GetImagesInfoAsync();
+                    await GetImagesInfoAsync();
+                }
             }
+        }
+        catch
+        {
+            OnConnectionLost();
         }
     }
 
     public async Task GetImagesInfoAsync()
     {
-        if (HostScreen is MainWindowViewModel mainWindowViewModel)
+        try
         {
-            AccountDTO account = new AccountDTO
+            if (HostScreen is MainWindowViewModel mainWindowViewModel)
             {
-                Login = mainWindowViewModel.UserName,
-                Password = mainWindowViewModel.Password
-            };
-            _imagesInfo = await _imageApiService.GetImagesInfoAsync(account);
-            if (_imagesInfo != null) InitCategoriesAndImageNames(_imagesInfo);
+                AccountDTO account = new AccountDTO
+                {
+                    Login = mainWindowViewModel.UserName,
+                    Password = mainWindowViewModel.Password
+                };
+                _imagesInfo = await _imageApiService.GetImagesInfoAsync(account);
+                if (_imagesInfo != null) InitCategoriesAndImageNames(_imagesInfo);
+            }
+        }
+        catch
+        {
+            OnConnectionLost();
         }
     }
+    #endregion
 
+    #region Private Methods
     private void InitCategoriesAndImageNames(List<ImageInfoDTO> imageInfoDTOs)
     {
         List<string> categories = [];
@@ -192,22 +253,36 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task GetImageAsync(string imageName)
     {
-        if (HostScreen is MainWindowViewModel mainWindowViewModel)
+        try
         {
-            GetImageDTO getImageDTO = new GetImageDTO
+            if (HostScreen is MainWindowViewModel mainWindowViewModel)
             {
-                ImageName = imageName,
-                Password = mainWindowViewModel.Password,
-                Login = mainWindowViewModel.UserName
-            };
+                GetImageDTO getImageDTO = new GetImageDTO
+                {
+                    ImageName = imageName,
+                    Password = mainWindowViewModel.Password,
+                    Login = mainWindowViewModel.UserName
+                };
 
-            var imageDTO = await _imageApiService.GetImageAsync(getImageDTO);
+                var imageDTO = await _imageApiService.GetImageAsync(getImageDTO);
 
-            if (imageDTO != null)
-            {
-                MemoryStream memoryStream = new MemoryStream(imageDTO.ImageData);
-                Image = new Bitmap(memoryStream);
+                if (imageDTO != null)
+                {
+                    MemoryStream memoryStream = new MemoryStream(imageDTO.ImageData);
+                    Image = new Bitmap(memoryStream);
+                }
             }
         }
+        catch
+        {
+            OnConnectionLost();
+        }
     }
+
+    private void OnConnectionLost()
+    {
+        IsConnected = false;
+        PlaceHolder = "Отсутсвует соединение с сервером";
+    }
+    #endregion
 }

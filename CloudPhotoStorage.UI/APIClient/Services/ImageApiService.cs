@@ -1,4 +1,6 @@
-﻿using CloudPhotoStorage.UI.APIClient.DTO;
+﻿using Avalonia.Controls.ApplicationLifetimes;
+using CloudPhotoStorage.UI.APIClient.DTO;
+using CloudPhotoStorage.UI.Services;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -17,12 +19,11 @@ public class ImageApiService
 {
     private static readonly HttpClient _httpClient = new HttpClient();
 
-    private readonly string? _apiURL;
+    private ConfigurationService _configuration;
 
-    public ImageApiService(IConfiguration configuration)
+    public ImageApiService(ConfigurationService configuration)
     {
-        var section = configuration.GetRequiredSection("BaseURL");
-        _apiURL = section.Value;
+        _configuration = configuration;
     }
 
     public async Task SendImageAsync(SendImageDTO sendImageDTO)
@@ -43,23 +44,47 @@ public class ImageApiService
 
         multipartFormContent.Add(imageContent, "ImageData", "ImageData");
 
-        var response = await _httpClient.PostAsync($"{_apiURL}api/images/post", multipartFormContent);
+        var response = await _httpClient.PostAsync($"{_configuration.GetApiUrl()}api/images/post", multipartFormContent);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await ShowMessageAsync("Ошибка", "Ошибка подключения");
+            throw new Exception();
+        }
     }
 
     public async Task<List<ImageInfoDTO>?> GetImagesInfoAsync(AccountDTO accountDTO)
     {
-        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_apiURL}api/images/get/names-with-categories", accountDTO);
-        List<ImageInfoDTO>? list = await response.Content.ReadFromJsonAsync<List<ImageInfoDTO>>();
+        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_configuration.GetApiUrl()}api/images/get/names-with-categories", accountDTO);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await ShowMessageAsync("Ошибка", "Ошибка подключения");
+            throw new Exception();
+        }
 
+        List<ImageInfoDTO>? list = await response.Content.ReadFromJsonAsync<List<ImageInfoDTO>>();
         return list;
     }
 
     public async Task<ImageDTO?> GetImageAsync(GetImageDTO getImageDTO)
     {
-        var response = await _httpClient.PostAsJsonAsync<GetImageDTO>($"{_apiURL}api/image/get", getImageDTO);
+        var response = await _httpClient.PostAsJsonAsync<GetImageDTO>($"{_configuration.GetApiUrl()}api/image/get", getImageDTO);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await ShowMessageAsync("Ошибка", "Ошибка подключения");
+            throw new Exception();
+        }
 
         var imageDTO = await response.Content.ReadFromJsonAsync<ImageDTO>();
 
         return imageDTO;
+    }
+
+    private async Task ShowMessageAsync(string caption, string message)
+    {
+        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
+            if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
+        }
     }
 }
