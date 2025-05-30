@@ -7,6 +7,6 @@ namespace CloudPhotoStorage.DataBase.Models
         [Key]
         public Guid CategoryId { get; set; }
 
-        public string CategoryName { get; set; }
+        public required string CategoryName { get; set; }
     }
 }

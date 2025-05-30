@@ -30,7 +30,6 @@ namespace CloudPhotoStorage.DataBase.Repositories
 
             var newCategory = new Category
             {
-                CategoryId = Guid.NewGuid(),
                 CategoryName = name
             };
 
@@ -40,7 +39,7 @@ namespace CloudPhotoStorage.DataBase.Repositories
             return newCategory.CategoryId;
         }
         
-        public Task<Category> GetCategoryByName(string name, CancellationToken cancellationToken)
+        public Task<Category?> GetCategoryByName(string name, CancellationToken cancellationToken)
         {
             return  _dbContext.Categories
                 .FirstOrDefaultAsync(c => c.CategoryName == name, cancellationToken);
