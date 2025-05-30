@@ -24,6 +24,8 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
 
     private bool _isLogined;
 
+    private bool _isAuthorizationButtonVisible = true;
+
     private bool _isAuthenticationChecked;
 
     private bool _isPhotoChecked;
@@ -41,7 +43,17 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
     public bool IsLogined
     {
         get => _isLogined;
-        set => this.RaiseAndSetIfChanged(ref _isLogined, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isLogined, value);
+            IsAuthorizationButtonVisible = !value;
+        }
+    }
+
+    public bool IsAuthorizationButtonVisible
+    {
+        get => _isAuthorizationButtonVisible;
+        set => this.RaiseAndSetIfChanged(ref _isAuthorizationButtonVisible, value);
     }
 
     public bool IsAuthenticationChecked
@@ -104,7 +116,9 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
 
     public IObservable<IRoutableViewModel> LoginSelect()
     {
-        if(_loginViewModel != null) _loginViewModel.Logined -= OnLogined;
+        LoginCheck();
+
+        if (_loginViewModel != null) _loginViewModel.Logined -= OnLogined;
         _loginViewModel = _componentContext.Resolve<LoginViewModel>();
         _loginViewModel.Logined += OnLogined;
 
@@ -149,6 +163,13 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
     {
         IsAuthenticationChecked = false;
         IsConfigurationChecked = true;
+        IsPhotoChecked = false;
+    }
+
+    private void LoginCheck()
+    {
+        IsAuthenticationChecked = true;
+        IsConfigurationChecked = false;
         IsPhotoChecked = false;
     }
     #endregion

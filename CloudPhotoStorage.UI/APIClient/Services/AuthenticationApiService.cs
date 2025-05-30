@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls.ApplicationLifetimes;
 using CloudPhotoStorage.UI.APIClient.DTO;
+using CloudPhotoStorage.UI.Services;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -11,23 +12,22 @@ public class AuthenticationApiService
 {
     private static readonly HttpClient _httpClient = new HttpClient();
 
-    private readonly string? _apiURL;
+    private ConfigurationService _configuration;
 
-    public AuthenticationApiService(IConfiguration configuration)
+    public AuthenticationApiService(ConfigurationService configuration)
     {
-        var section = configuration.GetRequiredSection("BaseURL");
-        _apiURL = section.Value;
+        _configuration = configuration;
     }
 
     public async Task<bool> RegistrationAsync(AccountDTO account)
     {
-        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_apiURL}api/account/registration", account);
+        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_configuration.GetApiUrl()}api/account/registration", account);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> LoginAsync(AccountDTO account)
     {
-        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_apiURL}api/account/login", account);
+        var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_configuration.GetApiUrl()}api/account/login", account);
         return response.IsSuccessStatusCode;
     }
 

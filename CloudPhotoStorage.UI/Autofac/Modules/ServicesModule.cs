@@ -17,13 +17,21 @@ public class ServicesModule : Module
     {
         base.Load(builder);
 
+        string configurationFile = "appsettings.json";
+        var appSettingsPath = Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\CloudPhotoStorage.UI", configurationFile);
+
         IConfiguration configuration = new ConfigurationBuilder()
                    .SetBasePath(Path.Combine(AppContext.BaseDirectory))
-                   .AddJsonFile("appsettings.json")
+                   .AddJsonFile(configurationFile)
                    .Build();
+        builder
+            .RegisterInstance<string>(appSettingsPath);
 
         builder
             .RegisterInstance<IConfiguration>(configuration);
+
+        builder
+            .RegisterType<ConfigurationService>();
 
         builder
             .RegisterType<ImageApiService>();

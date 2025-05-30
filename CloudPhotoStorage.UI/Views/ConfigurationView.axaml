@@ -2,7 +2,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:CloudPhotoStorage.UI.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:DataType="vm:ConfigurationViewModel"
              x:Class="CloudPhotoStorage.UI.Views.ConfigurationView">
-  Configuration View
+	<Grid Margin="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="40"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="150"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="100"/>
+		</Grid.ColumnDefinitions>
+		<TextBlock Grid.Column="0"
+				   Grid.Row="0"
+				   VerticalAlignment="Center"
+				   Text="URL-адрес сервиса:"/>
+		<TextBox Grid.Row="0"
+				 Grid.Column="1"
+				 Grid.ColumnSpan="2"
+				 Text="{Binding CurrentApiUrl}"/>
+		<Button Grid.Row="2"
+				Grid.Column="2"
+				VerticalAlignment="Stretch"
+				HorizontalAlignment="Center"
+				VerticalContentAlignment="Center"
+				Content="Сохранить"
+				Command="{Binding Commands.SaveConfiguration}"
+				IsEnabled="{Binding HasChanges}"/>
+	</Grid>
 </UserControl>

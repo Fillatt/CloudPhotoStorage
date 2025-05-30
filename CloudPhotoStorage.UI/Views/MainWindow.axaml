@@ -12,7 +12,8 @@
         x:Class="CloudPhotoStorage.UI.Views.MainWindow"
 		x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="CloudPhotoStorage.UI">
+        Title="CloudPhotoStorage"
+		WindowStartupLocation="CenterScreen">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="50"/>
@@ -26,8 +27,29 @@
 			<ColumnDefinition Width="200"/>
 			<ColumnDefinition Width="120"/>
 		</Grid.ColumnDefinitions>
-	
+
 		<ToggleButton Grid.Column="0"
+					  Grid.Row="0"
+					  Content="Настройки"
+					  VerticalAlignment="Stretch"
+					  HorizontalAlignment="Stretch"
+					  HorizontalContentAlignment="Center"
+					  VerticalContentAlignment="Center"
+					  Command="{Binding Commands.ConfigurationSelect}"
+					  IsChecked="{Binding IsConfigurationChecked}"/>
+		
+		<ToggleButton Grid.Column="1"
+					  Grid.Row="0"
+					  Content="Авторизация"
+					  VerticalAlignment="Stretch"
+					  HorizontalAlignment="Stretch"
+					  HorizontalContentAlignment="Center"
+					  VerticalContentAlignment="Center"
+					  Command="{Binding Commands.LoginSelect}"
+					  IsChecked="{Binding IsAuthenticationChecked}"
+					  IsVisible="{Binding IsAuthorizationButtonVisible}"/>
+
+		<ToggleButton Grid.Column="1"
 					  Grid.Row="0"
 					  Content="Фотографии"
 					  VerticalAlignment="Stretch"
@@ -36,16 +58,6 @@
 					  VerticalContentAlignment="Center"
 					  Command="{Binding Commands.PhotoSelect}"
 					  IsChecked="{Binding IsPhotoChecked}"
-					  IsVisible="{Binding IsLogined}"/>
-		<ToggleButton Grid.Column="1"
-					  Grid.Row="0"
-					  Content="Настройки"
-					  VerticalAlignment="Stretch"
-					  HorizontalAlignment="Stretch"
-					  HorizontalContentAlignment="Center"
-					  VerticalContentAlignment="Center"
-					  Command="{Binding Commands.ConfigurationSelect}"
-					  IsChecked="{Binding IsConfigurationChecked}"
 					  IsVisible="{Binding IsLogined}"/>
 
 		<StackPanel Grid.Row="0"
