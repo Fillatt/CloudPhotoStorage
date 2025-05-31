@@ -14,4 +14,7 @@ public class ImageInfoDTO
 
     [JsonPropertyName("category")]
     public required string Category { get; set; }
+
+    [JsonPropertyName("uploadDate")]
+    public required DateTime? UploadDate { get; set; }
 }
