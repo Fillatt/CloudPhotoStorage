@@ -32,6 +32,8 @@ public partial class AddPhotoDialogViewModel : ViewModelBase
     private AddPhotoDialogWindow? _dialogWindow;
 
     private bool _canSave;
+
+    private bool _isEnabled;
     #endregion
 
     #region Properties
@@ -41,6 +43,8 @@ public partial class AddPhotoDialogViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _imagePath, value);
+            if (value == null || value == string.Empty) IsEnabled = false;
+            else IsEnabled = true;
             CanSave = IsImageParametersNullOrEmpty();
         }
     }
@@ -78,6 +82,12 @@ public partial class AddPhotoDialogViewModel : ViewModelBase
     {
         get => _canSave;
         set => this.RaiseAndSetIfChanged(ref _canSave, value);
+    }
+
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
     }
     #endregion
 

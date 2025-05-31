@@ -1,18 +1,14 @@
 ﻿using Avalonia.Controls.ApplicationLifetimes;
 using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.Services;
-using Microsoft.Extensions.Configuration;
+using CloudPhotoStorage.UI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace CloudPhotoStorage.UI.APIClient.Services;
 
@@ -55,7 +51,7 @@ public class ImageApiService
         var response = await _httpClient.PostAsJsonAsync<AccountDTO>($"{_configuration.GetApiUrl()}api/images/get/names-with-categories", accountDTO);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            await ShowMessageAsync("Ошибка", "Ошибка подключения");
+            ShowNotification("Ошибка подключения", true);
             throw new Exception();
         }
 
@@ -68,7 +64,7 @@ public class ImageApiService
         var response = await _httpClient.PostAsJsonAsync<GetImageDTO>($"{_configuration.GetApiUrl()}api/image/get", getImageDTO);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            await ShowMessageAsync("Ошибка", "Ошибка подключения");
+            ShowNotification("Ошибка подключения", true);
             throw new Exception();
         }
 
@@ -83,12 +79,12 @@ public class ImageApiService
         return response.StatusCode;
     }
 
-    private async Task ShowMessageAsync(string caption, string message)
+    private void ShowNotification(string message, bool isError)
     {
-        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop &&
+            desktop.MainWindow?.DataContext is MainWindowViewModel mainWindowViewModel)
         {
-            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
-            if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
+            mainWindowViewModel.ShowNotification(message, isError);
         }
     }
 }

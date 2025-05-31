@@ -8,6 +8,8 @@
 		xmlns:vw="using:CloudPhotoStorage.UI.Views"
 		xmlns:sections="using:CloudPhotoStorage.UI.Sections"
 		xmlns:views="using:CloudPhotoStorage.UI.Views"
+		xmlns:notifications_controls="clr-namespace:Avalonia.Notification.Controls;assembly=Notification.Avalonia"
+		
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CloudPhotoStorage.UI.Views.MainWindow"
 		x:DataType="vm:MainWindowViewModel"
@@ -59,7 +61,7 @@
 					  Command="{Binding Commands.PhotoSelect}"
 					  IsChecked="{Binding IsPhotoChecked}"
 					  IsVisible="{Binding IsLogined}"/>
-
+		
 		<StackPanel Grid.Row="0"
 					Grid.Column="4"
 					Orientation="Horizontal"
@@ -88,5 +90,11 @@
 				<app:AppViewLocator />
 			</rxui:RoutedViewHost.ViewLocator>
 		</rxui:RoutedViewHost>
+
+		<Border Grid.Row="0"
+				Grid.RowSpan="2"
+				Grid.Column="3">
+			<notifications_controls:NotificationMessageContainer Manager="{Binding Manager}" />
+		</Border>
 	</Grid>
 </Window>

@@ -53,7 +53,7 @@ public partial class ConfigurationViewModel : ViewModelBase, IRoutableViewModel
         _apiUrl = _configurationService.GetApiUrl();
         CurrentApiUrl = _apiUrl;
 
-        await ShowMessageAsync("Внимание", "Настройки сохранены");
+        ShowNotification("Настройки сохранены", false);
     }
 
     private bool IsSettingsChanged()
@@ -61,12 +61,9 @@ public partial class ConfigurationViewModel : ViewModelBase, IRoutableViewModel
         return _apiUrl != _currentApiUrl;
     }
 
-    private async Task ShowMessageAsync(string caption, string message)
+    private void ShowNotification(string message, bool isError)
     {
-        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
-            if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
-        }
+        if (HostScreen is MainWindowViewModel mainWindowViewModel)
+            mainWindowViewModel.ShowNotification(message, isError);
     }
 }

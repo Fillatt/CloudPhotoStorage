@@ -78,7 +78,7 @@ public partial class LoginViewModel : ViewModelBase, IRoutableViewModel
         }
         else
         {
-            await ShowMessageAsync("Ошибка", "Имя пользователя или пароль не могут быть пустыми.");
+            ShowNotification("Имя пользователя или пароль не могут быть пустыми.", true);
             IsEnabled = true;
         }
         IsEnabled = true;
@@ -92,13 +92,10 @@ public partial class LoginViewModel : ViewModelBase, IRoutableViewModel
 
     private bool IsPasswordEmpty() => _password == string.Empty || _password == null;
 
-    private async Task ShowMessageAsync(string caption, string message)
+    private void ShowNotification(string message, bool isError)
     {
-        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
-            if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
-        }
+        if (HostScreen is MainWindowViewModel mainWindowViewModel) 
+            mainWindowViewModel.ShowNotification(message, isError);
     }
 
     private async Task TryLoginAsync(AccountDTO account)
@@ -108,22 +105,22 @@ public partial class LoginViewModel : ViewModelBase, IRoutableViewModel
             var statusCode = await _authenticationApiService.LoginAsync(account);
             if (statusCode == System.Net.HttpStatusCode.OK)
             {
-                await ShowMessageAsync("Внимание", $"Вход в аккаунт \"{Login}\" прошел успешно.");
+                ShowNotification($"Вход в аккаунт \"{Login}\" прошел успешно.", false);
                 Logined?.Invoke(this, new EventArgs());
                 ResetLoginAndPassword();
             }
             else if (statusCode == System.Net.HttpStatusCode.NotFound)
             {
-                await ShowMessageAsync("Ошибка", "Ошибка подключения.");
+                ShowNotification("Ошибка подключения.", true);
             }
             else
             {
-                await ShowMessageAsync("Ошибка", "Неверно указано имя пользователя или пароль.");
+                ShowNotification("Неверно указано имя пользователя или пароль.", true);
             }
         }
         catch
         {
-            await ShowMessageAsync("Ошибка", "Отсутсвует соединение с сервером.");
+            ShowNotification("Отсутсвует соединение с сервером.", true);
         }
     }
 

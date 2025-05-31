@@ -67,7 +67,7 @@ public partial class RegistrationViewModel : ViewModelBase, IRoutableViewModel
         }
         else
         {
-            await ShowMessageAsync("Ошибка", "Пароль или имя не могут быть пустым");
+            ShowNotification("Пароль или имя не могут быть пустым", true);
         }
         IsEnabled = true;
     }
@@ -86,13 +86,10 @@ public partial class RegistrationViewModel : ViewModelBase, IRoutableViewModel
 
     private bool IsPasswordEmpty() => _password == string.Empty || _password == null;
 
-    private async Task ShowMessageAsync(string caption, string message)
+    private void ShowNotification(string message, bool isError)
     {
-        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
-            if(desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
-        }
+        if (HostScreen is MainWindowViewModel mainWindowViewModel) 
+            mainWindowViewModel.ShowNotification(message, isError);
     }
 
     private async Task TryRegisterAsync(AccountDTO account)
@@ -101,25 +98,19 @@ public partial class RegistrationViewModel : ViewModelBase, IRoutableViewModel
         if (statusCode == System.Net.HttpStatusCode.OK)
         {
             string message = $"Пользователь с именем \"{Login}\" успешно зарегистрирован.";
-            await ShowMessageAsync("Внимание", message);
-            ResetLoginAndPassword();
+            ShowNotification(message, false);
+            GoBack();
         }
         else if (statusCode == System.Net.HttpStatusCode.NotFound)
         {
             string message = "Ошибка подключения.";
-            await ShowMessageAsync("Ошибка", message);
+            ShowNotification(message, true);
         }
         else
         {
             string message = $"Пользователь с именем \"{Login}\" существует.";
-            await ShowMessageAsync("Ошибка", message);
+            ShowNotification(message, true);
         }
-    }
-
-    private void ResetLoginAndPassword()
-    {
-        Login = string.Empty;
-        Password = string.Empty;
     }
     #endregion
 }

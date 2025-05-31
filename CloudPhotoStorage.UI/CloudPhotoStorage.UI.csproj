@@ -30,6 +30,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+    <PackageReference Include="Notification.Avalonia" Version="2.1.0" />
     <PackageReference Include="ReactiveUI" Version="20.2.45" />
   </ItemGroup>
 

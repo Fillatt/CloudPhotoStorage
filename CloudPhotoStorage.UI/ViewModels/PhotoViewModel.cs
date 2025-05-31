@@ -126,6 +126,7 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
             {
                 CanDelete = false;
                 Image = null;
+                CurrentImageName = string.Empty;
                 IsPlaceholderVisible = true;
             }
         }
@@ -196,11 +197,11 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
                     var statusCode = await _imageApiService.SendImageAsync(sendImageDTO);
 
                     if (statusCode == HttpStatusCode.NotFound)
-                        await ShowMessageAsync("Ошибка", "Ошибка подключения");
-                    else if (statusCode == HttpStatusCode.BadRequest) 
-                        await ShowMessageAsync("Ошибка", $"Изображение с именем \"{sendImageDTO.Name}\" уже существует.");
+                        ShowNotification("Ошибка подключения", true);
+                    else if (statusCode == HttpStatusCode.BadRequest)
+                        ShowNotification($"Изображение с именем \"{sendImageDTO.Name}\" уже существует.", true);
                     else if(statusCode == HttpStatusCode.OK) 
-                        await ShowMessageAsync("Внимание", "Изображение добавлено.");
+                        ShowNotification("Изображение добавлено.", false);
 
                     await GetImagesInfoAsync();
                 }
@@ -238,7 +239,7 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         if (Image != null)
         {
             await _filesService.SaveImageAsync(Image, CurrentImageName);
-            await ShowMessageAsync("Внимание", "Изображение сохранено.");
+            ShowNotification("Изображение сохранено.", false);
         }
     }
     #endregion
@@ -318,23 +319,21 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
             if (decisionViewModel.IsOk)
             {
                 var statusCode = await _imageApiService.DeleteImage(dto);
-                if (statusCode == System.Net.HttpStatusCode.NotFound) await ShowMessageAsync("Ошибка", "Ошибка подключения");
+                if (statusCode == System.Net.HttpStatusCode.NotFound) 
+                    ShowNotification("Ошибка подключения", true);
                 else
                 {
-                    await ShowMessageAsync("Внимание", $"Изображение \"{dto.ImageName}\" удалено.");
+                    ShowNotification($"Изображение \"{dto.ImageName}\" удалено.", false);
                     await GetImagesInfoAsync();
                 }
             }
         }
     }
 
-    private async Task ShowMessageAsync(string caption, string message)
+    private void ShowNotification(string message, bool isError)
     {
-        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(caption, message);
-            if (desktop.MainWindow != null) await messageBox.ShowWindowDialogAsync(desktop.MainWindow);
-        }
+        if (HostScreen is MainWindowViewModel mainWindowViewModel)
+            mainWindowViewModel.ShowNotification(message, isError);
     }
     #endregion
 }

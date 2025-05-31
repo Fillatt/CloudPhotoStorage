@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Notification;
 using CloudPhotoStorage.UI.Views;
 using ReactiveUI;
 using System;
@@ -83,6 +84,8 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
     public string Password => _password;
 
     public RoutingState Router { get; } = new RoutingState();
+
+    public INotificationMessageManager Manager { get; } = new NotificationMessageManager();
     #endregion
 
     #region Constructors
@@ -148,6 +151,22 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
         _configurationViewModel = _componentContext.Resolve<ConfigurationViewModel>();
 
         return Router.Navigate.Execute(_configurationViewModel);
+    }
+
+    public void ShowNotification(string message, bool isError)
+    {
+        string color = string.Empty;
+        if (isError) color = "#ff0000";
+        else color = "#90ee90";
+
+            Manager
+               .CreateMessage()
+               .Animates(true)
+               .Foreground(color)
+               .HasMessage(message)
+               .Dismiss().WithButton("ОК", button => { })
+               .Dismiss().WithDelay(TimeSpan.FromSeconds(5))
+               .Queue();
     }
     #endregion
 
