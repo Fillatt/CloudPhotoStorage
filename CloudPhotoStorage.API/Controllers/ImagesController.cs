@@ -185,7 +185,7 @@ namespace CloudPhotoStorage.API.Controllers
                     }
 
                     // Проверка уникальности имени изображения
-                    var imagesList = await _imageRepo.GetByUserIdAsync(user.UserId, cancellationToken);
+                    var imagesList = await _imageRepo.GetImagesByUserId(user.UserId, cancellationToken);
                     if (imagesList.Any(i => i.ImageName == imageDto.Name))
                     {
                         return BadRequest("Изображение с таким именем уже существует");
@@ -231,7 +231,7 @@ namespace CloudPhotoStorage.API.Controllers
             try
             {
                 var getImageDto = await HttpContext.Request.ReadFromJsonAsync<GetImageDTO>();
-                var user = await _userRepo.GetUserByLoginAsync(getImageDto.Login, cancellationToken);
+                var user = await _userRepo.GetUserByLogin(getImageDto.Login, cancellationToken);
 
                 if (user != null)
                 {
@@ -244,14 +244,14 @@ namespace CloudPhotoStorage.API.Controllers
                         return Unauthorized("Неверный пароль");
                     }
 
-                    var image = await _imageRepo.GetImageByNameAsync(getImageDto.ImageName, cancellationToken);
+                    var image = await _imageRepo.GetImageByName(getImageDto.ImageName, cancellationToken);
 
                     if (image == null)
                     {
-                        return NotFound("Изображение не найдено");
+                        return BadRequest("Изображение не найдено");
                     }
 
-                    await _imageRepo.DeleteAsync(image, cancellationToken);
+                    await _imageRepo.DeleteImage(image, cancellationToken);
                     return Ok();
                 }
                 else return NotFound();
@@ -288,18 +288,21 @@ namespace CloudPhotoStorage.API.Controllers
                     return Unauthorized("Неверный пароль");
                 }
 
-                var imagesList = await _imageRepo.GetByUserIdAsync(user.UserId, cancellationToken);
+                var imagesList = await _imageRepo.GetImagesByUserId(user.UserId, cancellationToken);
 
-                var imageDtos = await Task.WhenAll(imagesList.Select(async x =>
-                new ImageWithCategoryAndUploadDateDto
+                List<ImageWithCategoryAndUploadDateDto> imagesInfo = new();
+                foreach (var image in imagesList)
                 {
-                    ImageName = x.ImageName,
-                    Category = await _categoryRepo.GetCategoryNameByIdAsync(x.CategoryId, cancellationToken),
-                    UploadDate = x.UploadDate
-                }));
+                    var category = await _categoryRepo.GetCategoryById(image.CategoryId, cancellationToken);
+                    imagesInfo.Add(new ImageWithCategoryAndUploadDateDto
+                    {
+                        ImageName = image.ImageName,
+                        Category = category.CategoryName,
+                        UploadDate = image.UploadDate
+                    });
+                }
 
-                var result = imageDtos.ToList();
-                return Ok(result);
+                return Ok(imagesInfo);
             }
             catch (Exception ex)
             {

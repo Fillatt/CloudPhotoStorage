@@ -28,5 +28,11 @@ public partial class PhotoViewModel
 
         public ReactiveCommand<Unit, Task> GetImagesInfo =>
            ReactiveCommand.Create(photoViewModel.GetImagesInfoAsync);
+
+        public ReactiveCommand<Unit, Task> Delete =>
+          ReactiveCommand.Create(photoViewModel.DeleteImageAsync);
+
+        public ReactiveCommand<Unit, Task> Save =>
+          ReactiveCommand.Create(photoViewModel.SaveImageAsync);
     }
 }

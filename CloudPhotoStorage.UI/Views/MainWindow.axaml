@@ -14,7 +14,7 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="CloudPhotoStorage"
 		WindowStartupLocation="CenterScreen">
-	<Grid>
+	<Grid Margin="10">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="50"/>
 			<RowDefinition Height="*"/>

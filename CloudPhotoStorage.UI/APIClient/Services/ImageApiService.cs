@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -26,7 +27,7 @@ public class ImageApiService
         _configuration = configuration;
     }
 
-    public async Task SendImageAsync(SendImageDTO sendImageDTO)
+    public async Task<HttpStatusCode> SendImageAsync(SendImageDTO sendImageDTO)
     {
         using var multipartFormContent = new MultipartFormDataContent();
 
@@ -45,11 +46,8 @@ public class ImageApiService
         multipartFormContent.Add(imageContent, "ImageData", "ImageData");
 
         var response = await _httpClient.PostAsync($"{_configuration.GetApiUrl()}api/images/post", multipartFormContent);
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            await ShowMessageAsync("Ошибка", "Ошибка подключения");
-            throw new Exception();
-        }
+        
+        return response.StatusCode;
     }
 
     public async Task<List<ImageInfoDTO>?> GetImagesInfoAsync(AccountDTO accountDTO)
@@ -77,6 +75,12 @@ public class ImageApiService
         var imageDTO = await response.Content.ReadFromJsonAsync<ImageDTO>();
 
         return imageDTO;
+    }
+
+    public async Task<HttpStatusCode> DeleteImage(GetImageDTO dto)
+    {
+        var response = await _httpClient.PostAsJsonAsync<GetImageDTO>($"{_configuration.GetApiUrl()}api/images/delete", dto);
+        return response.StatusCode;
     }
 
     private async Task ShowMessageAsync(string caption, string message)

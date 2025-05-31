@@ -4,9 +4,11 @@ using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.APIClient.Services;
 using CloudPhotoStorage.UI.Services;
 using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
@@ -26,9 +28,11 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
 
     private string _currentImageName;
 
-    private List<string> _filteredImageNames;
-
     private List<ImageInfoDTO>? _imagesInfo;
+
+    private List<ImageInfoDTO> _filteredImagesInfo;
+
+    private ImageInfoDTO _currentImageInfo;
 
     private Bitmap? _image;
 
@@ -90,19 +94,32 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         set
         {
             this.RaiseAndSetIfChanged(ref _currentCategory, value);
-            FilterImageNames(value);
+            FilterImages(value);
         }
     }
 
     public string CurrentImageName
     {
         get => _currentImageName;
+        set => this.RaiseAndSetIfChanged(ref _currentImageName, value);
+    }
+
+    public List<ImageInfoDTO> FilteredImagesInfo
+    {
+        get => _filteredImagesInfo;
+        set => this.RaiseAndSetIfChanged(ref _filteredImagesInfo, value);
+    }
+
+    public ImageInfoDTO CurrentImageInfo
+    {
+        get => _currentImageInfo;
         set
         {
-            this.RaiseAndSetIfChanged(ref _currentImageName, value);
+            this.RaiseAndSetIfChanged(ref _currentImageInfo, value);
             if (value != null)
             {
-                _ = GetImageAsync(value);
+                CurrentImageName = value.ImageName;
+                _ = GetImageAsync(value.ImageName);
                 CanDelete = true;
             }
             else
@@ -112,12 +129,6 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
                 IsPlaceholderVisible = true;
             }
         }
-    }
-
-    public List<string> FilteredImageNames
-    {
-        get => _filteredImageNames;
-        set => this.RaiseAndSetIfChanged(ref _filteredImageNames, value);
     }
 
     public Bitmap? Image
@@ -182,8 +193,15 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
                         Password = mainWindowViewModel.Password
                     };
 
-                    await _imageApiService.SendImageAsync(sendImageDTO);
-                    await ShowMessageAsync("Внимание", "Изображение добавлено.");
+                    var statusCode = await _imageApiService.SendImageAsync(sendImageDTO);
+
+                    if (statusCode == HttpStatusCode.NotFound)
+                        await ShowMessageAsync("Ошибка", "Ошибка подключения");
+                    else if (statusCode == HttpStatusCode.BadRequest) 
+                        await ShowMessageAsync("Ошибка", $"Изображение с именем \"{sendImageDTO.Name}\" уже существует.");
+                    else if(statusCode == HttpStatusCode.OK) 
+                        await ShowMessageAsync("Внимание", "Изображение добавлено.");
+
                     await GetImagesInfoAsync();
                 }
             }
@@ -214,6 +232,15 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
             OnConnectionLost();
         }
     }
+
+    public async Task SaveImageAsync()
+    {
+        if (Image != null)
+        {
+            await _filesService.SaveImageAsync(Image, CurrentImageName);
+            await ShowMessageAsync("Внимание", "Изображение сохранено.");
+        }
+    }
     #endregion
 
     #region Private Methods
@@ -231,14 +258,14 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         CurrentCategory = Categories.FirstOrDefault();
     }
 
-    private void FilterImageNames(string? category)
+    private void FilterImages(string? category)
     {
         if (category != null)
         {
-            List<string> imageNames = _imagesInfo.Where(x => x.Category == category).Select(x => x.ImageName).ToList();
-            FilteredImageNames = imageNames;
+            var imagesInfo = _imagesInfo.Where(x => x.Category == category).ToList();
+            FilteredImagesInfo = imagesInfo;
         }
-        else FilteredImageNames = [];
+        else FilteredImagesInfo = [];
     }
 
     private async Task GetImageAsync(string imageName)
@@ -273,6 +300,32 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
     {
         IsConnected = false;
         PlaceHolder = "Отсутсвует соединение с сервером";
+    }
+
+    private async Task DeleteImageAsync()
+    {
+        if (HostScreen is MainWindowViewModel mainWindowViewModel)
+        {
+            GetImageDTO dto = new GetImageDTO
+            {
+                ImageName = _currentImageName,
+                Login = mainWindowViewModel.UserName,
+                Password = mainWindowViewModel.Password,
+            };
+
+            DecisionViewModel decisionViewModel = new($"Подтвердите удаление изображения \"{dto.ImageName}\".");
+            await decisionViewModel.ShowDialogAsync();
+            if (decisionViewModel.IsOk)
+            {
+                var statusCode = await _imageApiService.DeleteImage(dto);
+                if (statusCode == System.Net.HttpStatusCode.NotFound) await ShowMessageAsync("Ошибка", "Ошибка подключения");
+                else
+                {
+                    await ShowMessageAsync("Внимание", $"Изображение \"{dto.ImageName}\" удалено.");
+                    await GetImagesInfoAsync();
+                }
+            }
+        }
     }
 
     private async Task ShowMessageAsync(string caption, string message)
