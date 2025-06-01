@@ -69,8 +69,10 @@
 					HorizontalAlignment="Center"
 					Margin="0 0 10 0">
 			<TextBlock Text="Пользователь: "
+					   FontSize="16"
 					   IsVisible="{Binding IsLogined}"/>
 			<TextBlock Text="{Binding UserName}"
+					   FontSize="16"
 					   IsVisible="{Binding IsLogined}"/>
 		</StackPanel>
 		<Button Grid.Column="5"

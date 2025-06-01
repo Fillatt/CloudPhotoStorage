@@ -156,13 +156,23 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
     public void ShowNotification(string message, bool isError)
     {
         string color = string.Empty;
-        if (isError) color = "#ff0000";
-        else color = "#90ee90";
+        string type = string.Empty;
+        if (isError)
+        {
+            color = "Red";
+            type = "Error";
+        }
+        else
+        {
+            color = "Green";
+            type = "Info";
+        }
 
             Manager
                .CreateMessage()
+               .HasBadge(type)
+               .Background(color)
                .Animates(true)
-               .Foreground(color)
                .HasMessage(message)
                .Dismiss().WithButton("ОК", button => { })
                .Dismiss().WithDelay(TimeSpan.FromSeconds(5))
