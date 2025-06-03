@@ -12,10 +12,18 @@ namespace CloudPhotoStorage.DataBase.Repositories
             _dbContext = dbContext;
         }
 
-        public Task<Image?> GetImageByName(string imageName, CancellationToken cancellationToken)
+        public async Task<Image?> GetImageByName(string imageName, string username, CancellationToken cancellationToken)
         {
-            return _dbContext.Images
-                .FirstOrDefaultAsync(i => i.ImageName == imageName, cancellationToken);
+            var userId = await _dbContext.Users
+                .Where(u => u.Login == username)
+                .Select(u => u.UserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (userId == Guid.Empty)
+                return null;
+
+            return await _dbContext.Images
+                .FirstOrDefaultAsync(i => i.ImageName == imageName && i.UserId == userId, cancellationToken);
         }
 
         public async Task<Dictionary<string, string>> GetUserImagesWithCategoriesAsync(string username, CancellationToken cancellationToken)
@@ -41,9 +49,17 @@ namespace CloudPhotoStorage.DataBase.Repositories
                 );
         }
 
-        public Task<List<Image>> GetImagesByUserId(Guid userId, CancellationToken cancellationToken)
+        public async Task<List<Image>> GetImagesByUserLogin(string username, CancellationToken cancellationToken)
         {
-            return _dbContext.Images
+            var userId = await _dbContext.Users
+                .Where(u => u.Login == username)
+                .Select(u => u.UserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (userId == Guid.Empty)
+                return new List<Image>();
+
+            return await _dbContext.Images
                 .Where(i => i.UserId == userId)
                 .ToListAsync(cancellationToken);
         }
@@ -85,9 +101,9 @@ namespace CloudPhotoStorage.DataBase.Repositories
             return _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteImageByName(string name, CancellationToken cancellationToken)
+        public async Task DeleteImageByName(string name, string username, CancellationToken cancellationToken)
         {
-            var image = await GetImageByName(name, cancellationToken);
+            var image = await GetImageByName(name, username, cancellationToken);
             if (image != null)
             {
                 await DeleteImage(image, cancellationToken);
@@ -100,9 +116,17 @@ namespace CloudPhotoStorage.DataBase.Repositories
                 .AnyAsync(i => i.ImageId == id, cancellationToken);
         }
 
-        public Task<int> GetImageCountByUserId(Guid userId, CancellationToken cancellationToken)
+        public async Task<int> GetImageCountByUserLogin(string username, CancellationToken cancellationToken)
         {
-            return _dbContext.Images
+            var userId = await _dbContext.Users
+                .Where(u => u.Login == username)
+                .Select(u => u.UserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (userId == Guid.Empty)
+                return 0;
+
+            return await _dbContext.Images
                 .Where(i => i.UserId == userId)
                 .CountAsync(cancellationToken);
         }
