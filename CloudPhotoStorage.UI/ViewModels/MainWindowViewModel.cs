@@ -168,15 +168,15 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
             type = "Info";
         }
 
-            Manager
-               .CreateMessage()
-               .HasBadge(type)
-               .Background(color)
-               .Animates(true)
-               .HasMessage(message)
-               .Dismiss().WithButton("ОК", button => { })
-               .Dismiss().WithDelay(TimeSpan.FromSeconds(5))
-               .Queue();
+        Manager
+           .CreateMessage()
+           .HasBadge(type)
+           .Background(color)
+           .Animates(true)
+           .HasMessage(message)
+           .Dismiss().WithButton("ОК", button => { })
+           .Dismiss().WithDelay(TimeSpan.FromSeconds(5))
+           .Queue();
     }
     #endregion
 
