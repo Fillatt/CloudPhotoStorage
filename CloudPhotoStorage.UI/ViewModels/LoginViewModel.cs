@@ -1,9 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using Avalonia.Controls.ApplicationLifetimes;
-using CloudPhotoStorage.UI.APIClient.DTO;
+﻿using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.APIClient.Services;
 using ReactiveUI;
+using System;
+using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
@@ -20,8 +19,8 @@ public partial class LoginViewModel : ViewModelBase, IRoutableViewModel
     #endregion
 
     #region Properties
-    public string Login 
-    { 
+    public string Login
+    {
         get => _login;
         set => this.RaiseAndSetIfChanged(ref _login, value);
     }
@@ -94,7 +93,7 @@ public partial class LoginViewModel : ViewModelBase, IRoutableViewModel
 
     private void ShowNotification(string message, bool isError)
     {
-        if (HostScreen is MainWindowViewModel mainWindowViewModel) 
+        if (HostScreen is MainWindowViewModel mainWindowViewModel)
             mainWindowViewModel.ShowNotification(message, isError);
     }
 

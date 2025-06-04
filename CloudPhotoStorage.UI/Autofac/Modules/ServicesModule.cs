@@ -3,11 +3,7 @@ using CloudPhotoStorage.UI.APIClient.Services;
 using CloudPhotoStorage.UI.Services;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.Autofac.Modules;
 

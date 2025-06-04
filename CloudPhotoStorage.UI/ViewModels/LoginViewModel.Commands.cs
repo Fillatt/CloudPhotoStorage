@@ -12,14 +12,14 @@ public partial class LoginViewModel
     {
         get
         {
-            if(_commands == null) _commands = new LoginViewModelCommands(this);
+            if (_commands == null) _commands = new LoginViewModelCommands(this);
             return _commands;
         }
     }
 
     public sealed class LoginViewModelCommands(LoginViewModel loginViewModel)
     {
-        public ReactiveCommand<Unit, IRoutableViewModel> Register 
+        public ReactiveCommand<Unit, IRoutableViewModel> Register
             => ReactiveCommand.CreateFromObservable(loginViewModel.Register);
 
         public ReactiveCommand<Unit, Task> Login

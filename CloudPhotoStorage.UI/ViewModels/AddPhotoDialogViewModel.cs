@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.Services;
@@ -8,8 +7,6 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
@@ -102,14 +99,14 @@ public partial class AddPhotoDialogViewModel : ViewModelBase
     #region Public Methods
     public void OnCategotySelected()
     {
-        if(_currentCategory != null) ImageCategory = _currentCategory;
+        if (_currentCategory != null) ImageCategory = _currentCategory;
         CurrentCategory = null;
     }
 
     public async Task OpenImageFileAsync()
     {
         var file = await _filesService.OpenImageFileAsync();
-        if(file != null)
+        if (file != null)
         {
             ImagePath = file.Path.LocalPath;
             _imageFile = file;
@@ -118,7 +115,7 @@ public partial class AddPhotoDialogViewModel : ViewModelBase
 
     public async Task ShowDialogAsync()
     {
-        if(App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             _dialogWindow = new() { DataContext = this };
             if (desktop.MainWindow != null) await _dialogWindow.ShowDialog(desktop.MainWindow);

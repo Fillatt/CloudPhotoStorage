@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
-using CloudPhotoStorage.UI.APIClient.DTO;
+﻿using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.APIClient.Services;
 using ReactiveUI;
 using System;
@@ -20,12 +19,12 @@ public partial class RegistrationViewModel : ViewModelBase, IRoutableViewModel
     #endregion
 
     #region Public Fields
-    public string Login 
-    { 
-        get => _login; 
-        set => this.RaiseAndSetIfChanged(ref _login, value); 
+    public string Login
+    {
+        get => _login;
+        set => this.RaiseAndSetIfChanged(ref _login, value);
     }
-    public string Password 
+    public string Password
     {
         get => _password;
         set => this.RaiseAndSetIfChanged(ref _password, value);
@@ -88,7 +87,7 @@ public partial class RegistrationViewModel : ViewModelBase, IRoutableViewModel
 
     private void ShowNotification(string message, bool isError)
     {
-        if (HostScreen is MainWindowViewModel mainWindowViewModel) 
+        if (HostScreen is MainWindowViewModel mainWindowViewModel)
             mainWindowViewModel.ShowNotification(message, isError);
     }
 

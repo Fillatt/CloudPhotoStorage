@@ -1,6 +1,4 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
-using CloudPhotoStorage.UI.Services;
-using Microsoft.Extensions.Configuration;
+﻿using CloudPhotoStorage.UI.Services;
 using ReactiveUI;
 using System.Threading.Tasks;
 

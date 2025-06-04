@@ -38,10 +38,10 @@ namespace CloudPhotoStorage.DataBase.Repositories
 
             return newCategory.CategoryId;
         }
-        
+
         public Task<Category?> GetCategoryByName(string name, CancellationToken cancellationToken)
         {
-            return  _dbContext.Categories
+            return _dbContext.Categories
                 .FirstOrDefaultAsync(c => c.CategoryName == name, cancellationToken);
         }
 

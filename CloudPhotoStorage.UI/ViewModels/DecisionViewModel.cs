@@ -1,11 +1,7 @@
 ﻿using Avalonia.Controls.ApplicationLifetimes;
 using CloudPhotoStorage.UI.Views;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
@@ -33,10 +29,10 @@ public class DecisionViewModel : ViewModelBase
 
     public async Task ShowDialogAsync()
     {
-        if(App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             _dialogWindow = new DecisionDialogWindow() { DataContext = this };
-            if(desktop.MainWindow != null) await _dialogWindow.ShowDialog(desktop.MainWindow);
+            if (desktop.MainWindow != null) await _dialogWindow.ShowDialog(desktop.MainWindow);
         }
     }
 

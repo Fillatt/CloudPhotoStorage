@@ -6,16 +6,16 @@ namespace CloudPhotoStorage.DataBase.Models
     public class Image
     {
         [Key]
-        public Guid ImageId {  get; set; }
+        public Guid ImageId { get; set; }
 
         [ForeignKey("UserId")]
         public Guid UserId { get; set; }
 
         [ForeignKey("CategoryId")]
-        public Guid CategoryId {  get; set; }
+        public Guid CategoryId { get; set; }
 
-        public string ImageName {  get; set; }
-        public byte[] ImageBytes{  get; set; }
+        public string ImageName { get; set; }
+        public byte[] ImageBytes { get; set; }
         public DateTime UploadDate { get; set; }
     }
 }

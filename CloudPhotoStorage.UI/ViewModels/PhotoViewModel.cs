@@ -1,10 +1,8 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.APIClient.Services;
 using CloudPhotoStorage.UI.Services;
 using ReactiveUI;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,10 +53,10 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _imagesInfo, value);
     }
 
-    public ImageInfoDTO SelectedImageInfo 
-    { 
-        get => _selectedImageInfo; 
-        set => this.RaiseAndSetIfChanged(ref _selectedImageInfo, value); 
+    public ImageInfoDTO SelectedImageInfo
+    {
+        get => _selectedImageInfo;
+        set => this.RaiseAndSetIfChanged(ref _selectedImageInfo, value);
     }
 
     public string? UrlPathSegment => "PhotoViewModel";
@@ -71,7 +69,7 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         set
         {
             this.RaiseAndSetIfChanged(ref _categories, value);
-            if(_categories.Any()) IsEnabled = true;
+            if (_categories.Any()) IsEnabled = true;
             else IsEnabled = false;
         }
     }
@@ -200,7 +198,7 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
                         ShowNotification("Ошибка подключения", true);
                     else if (statusCode == HttpStatusCode.BadRequest)
                         ShowNotification($"Изображение с именем \"{sendImageDTO.Name}\" уже существует.", true);
-                    else if(statusCode == HttpStatusCode.OK) 
+                    else if (statusCode == HttpStatusCode.OK)
                         ShowNotification("Изображение добавлено.", false);
 
                     await GetImagesInfoAsync();
@@ -250,9 +248,9 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
         List<string> categories = [];
         List<string> imageNames = [];
 
-        foreach(var imageDTO in  imageInfoDTOs)
+        foreach (var imageDTO in imageInfoDTOs)
         {
-            if(!categories.Any(x => x == imageDTO.Category)) categories.Add(imageDTO.Category);
+            if (!categories.Any(x => x == imageDTO.Category)) categories.Add(imageDTO.Category);
         }
 
         Categories = categories;
@@ -319,7 +317,7 @@ public partial class PhotoViewModel : ViewModelBase, IRoutableViewModel
             if (decisionViewModel.IsOk)
             {
                 var statusCode = await _imageApiService.DeleteImage(dto);
-                if (statusCode == System.Net.HttpStatusCode.NotFound) 
+                if (statusCode == System.Net.HttpStatusCode.NotFound)
                     ShowNotification("Ошибка подключения", true);
                 else
                 {

@@ -42,7 +42,7 @@ public class ImageApiService
         multipartFormContent.Add(imageContent, "ImageData", "ImageData");
 
         var response = await _httpClient.PostAsync($"{_configuration.GetApiUrl()}api/images/post", multipartFormContent);
-        
+
         return response.StatusCode;
     }
 

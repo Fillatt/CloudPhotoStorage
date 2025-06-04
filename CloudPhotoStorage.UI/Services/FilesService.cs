@@ -1,13 +1,9 @@
 ﻿using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.Services;
@@ -41,7 +37,7 @@ public class FilesService
                 AllowMultiple = false
             });
             var folder = folders.FirstOrDefault();
-            if(folder != null)
+            if (folder != null)
             {
                 image.Save(Path.Combine(folder.Path.LocalPath, imageName));
             }

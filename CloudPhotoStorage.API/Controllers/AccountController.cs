@@ -53,14 +53,6 @@ namespace CloudPhotoStorage.API.Controllers
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                // Логирование в историю посещений
-                _context.LoginHistories.Add(new LoginHistory
-                {
-                    UserId = user.UserId,
-                    LoginDate = DateTime.UtcNow
-                });
-                await _context.SaveChangesAsync();
-
                 return Ok(new { Message = "Пользователь успешно зарегистрирован" });
             }
             catch (Exception ex)
@@ -94,13 +86,6 @@ namespace CloudPhotoStorage.API.Controllers
                     }
                     else
                     {
-                        // Логирование в историю посещений
-                        _context.LoginHistories.Add(new LoginHistory
-                        {
-                            UserId = user.UserId,
-                            LoginDate = DateTime.UtcNow
-                        });
-
                         return Ok(new { Message = "Аутентификация успешна" });
                     }
                 }

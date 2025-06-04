@@ -14,23 +14,17 @@ namespace CloudPhotoStorage.API.Controllers
         private readonly ImageRepo _imageRepo;
         private readonly UserRepo _userRepo;
         private readonly CategoryRepo _categoryRepo;
-        private readonly WasteBasketRepo _wasteBasketRepo;
-        private readonly LoginHistoryRepo _loginHistoryRepo;
 
         public ImagesController(
             ILogger<ImagesController> logger,
             ImageRepo imageRepo,
             UserRepo userRepo,
-            CategoryRepo categoryRepo,
-            WasteBasketRepo wasteBasketRepo,
-            LoginHistoryRepo loginHistoryRepo)
+            CategoryRepo categoryRepo)
         {
             _logger = logger;
             _imageRepo = imageRepo;
             _userRepo = userRepo;
             _categoryRepo = categoryRepo;
-            _wasteBasketRepo = wasteBasketRepo;
-            _loginHistoryRepo = loginHistoryRepo;
         }
 
         /// <summary>
@@ -203,13 +197,6 @@ namespace CloudPhotoStorage.API.Controllers
 
                     await _imageRepo.AddImage(image, cancellationToken);
 
-                    await _loginHistoryRepo.AddLoginHistoryAsync(new LoginHistory
-                    {
-                        LoginId = Guid.NewGuid(),
-                        UserId = (Guid)userId,
-                        LoginDate = DateTime.UtcNow
-                    }, cancellationToken);
-
                     return Ok();
                 }
                 else return NotFound();
@@ -272,7 +259,7 @@ namespace CloudPhotoStorage.API.Controllers
         {
             try
             {
-                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>(); 
+                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
                 Guid userId = (Guid)await _userRepo.GetUserIdByLogin(userDto.Login, cancellationToken);
                 var user = await _userRepo.GetUserById(userId, cancellationToken);
                 if (user == null)

@@ -1,14 +1,7 @@
 ﻿using Autofac;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Notification;
-using CloudPhotoStorage.UI.Views;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
-using System.Threading.Tasks;
 
 namespace CloudPhotoStorage.UI.ViewModels;
 
@@ -112,7 +105,7 @@ public partial class MainWindowViewModel : ViewModelBase, IScreen
     {
         IsLogined = false;
         _userName = string.Empty;
-        _password = string.Empty; 
+        _password = string.Empty;
 
         return LoginSelect();
     }

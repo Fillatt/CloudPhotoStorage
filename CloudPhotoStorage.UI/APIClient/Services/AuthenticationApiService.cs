@@ -1,7 +1,5 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
-using CloudPhotoStorage.UI.APIClient.DTO;
+﻿using CloudPhotoStorage.UI.APIClient.DTO;
 using CloudPhotoStorage.UI.Services;
-using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
