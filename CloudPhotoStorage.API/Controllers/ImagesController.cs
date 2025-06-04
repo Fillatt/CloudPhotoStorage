@@ -244,7 +244,7 @@ namespace CloudPhotoStorage.API.Controllers
                         return Unauthorized("Неверный пароль");
                     }
 
-                    var image = await _imageRepo.GetImageByName(getImageDto.ImageName, cancellationToken);
+                    var image = await _imageRepo.GetImageByName(getImageDto.ImageName, user.Login, cancellationToken);
 
                     if (image == null)
                     {
