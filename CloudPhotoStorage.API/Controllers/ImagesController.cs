@@ -196,7 +196,6 @@ namespace CloudPhotoStorage.API.Controllers
                     };
 
                     await _imageRepo.AddImage(image, cancellationToken);
-
                     return Ok();
                 }
                 else return NotFound();
