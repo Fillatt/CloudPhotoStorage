@@ -27,60 +27,6 @@ namespace CloudPhotoStorage.API.Controllers
             _categoryRepo = categoryRepo;
         }
 
-        /// <summary>
-        /// Получить все изображения конкретного пользователя
-        /// </summary>
-        [HttpPost]
-        [Route("api/images/get-by-user")]
-        public async Task<ActionResult> GetImagesByUser(CancellationToken cancellationToken)
-        {
-            try
-            {
-                var userDto = await HttpContext.Request.ReadFromJsonAsync<UserDTO>();
-                var user = await _userRepo.GetUserByLogin(userDto.Login, cancellationToken);
-
-                if (user == null)
-                {
-                    return NotFound("Пользователь не найден");
-                }
-
-                // Проверка пароля
-                var passwordHash = user.PasswordHash;
-                var passwordSalt = user.PasswordSalt;
-
-                if (!PasswordHasher.VerifyPasswordHash(userDto.Password, passwordHash, passwordSalt))
-                {
-                    return Unauthorized("Неверный пароль");
-                }
-
-                var images = await _imageRepo.GetImagesByUserLogin(user.Login, cancellationToken);
-
-                if (images == null || !images.Any())
-                {
-                    return NotFound("Изображения не найдены");
-                }
-
-                var result = new List<ImageDTO>();
-                foreach (var image in images)
-                {
-                    var category = await _categoryRepo.GetCategoryById(image.CategoryId, cancellationToken);
-
-                    result.Add(new ImageDTO
-                    {
-                        ImageData = image.ImageBytes,
-                        Name = image.ImageName,
-                        UploadDate = image.UploadDate,
-                        CategoryName = category?.CategoryName ?? "Без категории"
-                    });
-                }
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении изображений пользователя");
-                return StatusCode(500, "Внутренняя ошибка сервера");
-            }
-        }
 
         /// <summary>
         /// Получить изображение по имени
