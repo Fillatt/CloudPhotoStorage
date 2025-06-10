@@ -13,19 +13,5 @@ namespace CloudPhotoStorage.DataBase
         {
             Database.EnsureCreated();
         }
-
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    if (!optionsBuilder.IsConfigured)
-        //    {
-        //        // optionsBuilder.UseNpgsql("Data Source=CloudPhotoStorage.db");
-        //        optionsBuilder.UseNpgsql(
-        //            "Host=localhost;" +
-        //            "Database=CloudPhotoStorage;" +
-        //            "Username=postgres;" +
-        //            "Password=123");
-        //    }
-        //    base.OnConfiguring(optionsBuilder);
-        //}
     }
 }
