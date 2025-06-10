@@ -254,7 +254,7 @@ namespace CloudPhotoStorage.API.Controllers
         /// </summary>
         [HttpPost]
         [Route("api/images/get/names-with-categories")]
-        public async Task<ActionResult<List<ImageWithCategoryDTO>>> GetImageNamesWithCategoriesAndDate(CancellationToken cancellationToken)
+        public async Task<ActionResult<List<ImageWithCategoryDTO>>> GetImageNamesWithCategories(CancellationToken cancellationToken)
         {
             try
             {
