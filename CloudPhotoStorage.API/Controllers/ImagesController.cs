@@ -254,7 +254,7 @@ namespace CloudPhotoStorage.API.Controllers
         /// </summary>
         [HttpPost]
         [Route("api/images/get/names-with-categories")]
-        public async Task<ActionResult<List<ImageWithCategoryAndUploadDateDto>>> GetImageNamesWithCategoriesAndDate(CancellationToken cancellationToken)
+        public async Task<ActionResult<List<ImageWithCategoryDTO>>> GetImageNamesWithCategoriesAndDate(CancellationToken cancellationToken)
         {
             try
             {
@@ -276,11 +276,11 @@ namespace CloudPhotoStorage.API.Controllers
 
                 var imagesList = await _imageRepo.GetImagesByUserLogin(user.Login, cancellationToken);
 
-                List<ImageWithCategoryAndUploadDateDto> imagesInfo = new();
+                List<ImageWithCategoryDTO> imagesInfo = new();
                 foreach (var image in imagesList)
                 {
                     var category = await _categoryRepo.GetCategoryById(image.CategoryId, cancellationToken);
-                    imagesInfo.Add(new ImageWithCategoryAndUploadDateDto
+                    imagesInfo.Add(new ImageWithCategoryDTO
                     {
                         ImageName = image.ImageName,
                         Category = category.CategoryName,
