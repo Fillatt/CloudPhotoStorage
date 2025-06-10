@@ -30,35 +30,5 @@ namespace CloudPhotoStorage.DataBase.Repositories
             return _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Login == login, cancellationToken);
         }
-
-        public Task<List<User>> GetAllUsers(CancellationToken cancellationToken)
-        {
-            return _dbContext.Users
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task AddUserAsync(User user, CancellationToken cancellationToken)
-        {
-            await _dbContext.Users.AddAsync(user, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        public Task UpdateUser(User user, CancellationToken cancellationToken)
-        {
-            _dbContext.Users.Update(user);
-            return _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        public Task DeleteUser(User user, CancellationToken cancellationToken)
-        {
-            _dbContext.Users.Remove(user);
-            return _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        public Task<bool> UserLoginExists(string login, CancellationToken cancellationToken)
-        {
-            return _dbContext.Users
-                .AnyAsync(u => u.Login == login, cancellationToken);
-        }
     }
 }
